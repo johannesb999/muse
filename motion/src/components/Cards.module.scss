@@ -1,0 +1,12 @@
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--gap);
+  margin-top: var(--gap);
+}
+
+.column-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
