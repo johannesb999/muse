@@ -1,0 +1,95 @@
+:root {
+  --bg: #000;
+  --card-bg: #111;
+  --card-bg-dark: #10100a;
+  --accent: #ccff33;
+  --text-light: #eee;
+  --text-muted: #ccd;
+  --radius: 1rem;
+  --gap: 3rem;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body,
+.page {
+  background: var(--bg);
+  color: var(--text-light);
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  padding: var(--gap);
+}
+
+.header .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.header .logo-sub {
+  font-weight: normal;
+  margin-left: 0.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--gap);
+  margin-top: var(--gap);
+}
+
+.column-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: var(--gap);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; 
+}
+
+.card--expertise {
+  background: var(--card-bg-dark);
+  color: var(--accent);
+  height: 35rem;
+}
+
+.card--expertise h2 {
+  font-size: 2rem;
+  margin-bottom: var(--gap);
+}
+
+.card--expertise p {
+  color: var(--text-muted);
+  margin-bottom: var(--gap);
+}
+
+.cta {
+  margin-top: auto;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.cta:hover {
+  text-decoration: underline;
+}
+
+.card--campus,
+.card--history {
+  height: 16rem; 
+}
+
+.card--campus h2,
+.card--history h2 {
+  font-size: 1.5rem;
+}
+
