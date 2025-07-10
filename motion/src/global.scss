@@ -1,8 +1,8 @@
 :root {
   --bg: #000;
   --card-bg: #111;
-  --card-bg-dark: #10100a;
-  --accent: #ccff33;
+  --card-bg-dark: #e0ff460b;
+  --accent: #E0FF46;
   --text-light: #eee;
   --text-muted: #ccd;
   --radius: 1rem;
@@ -15,7 +15,10 @@
   padding: 0;
 }
 
-body,
+body {
+    overflow: hidden;
+}
+
 .page {
   background: var(--bg);
   color: var(--text-light);
@@ -25,11 +28,7 @@ body,
 }
 
 .header .logo {
-  font-size: 1.5rem;
-  font-weight: bold;
+height: 3rem;
 }
 
-.header .logo-sub {
-  font-weight: normal;
-  margin-left: 0.5rem;
-}
+

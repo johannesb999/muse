@@ -22,9 +22,7 @@ export default function App() {
   return (
     <div className="page">
       <header className="header">
-        <div className="logo">
-          SGP <span className="logo-sub">Schneider Geiwitz</span>
-        </div>
+        <img src="/assets/sgpLogo.png" alt="SGP Schneider Geiwitz Logo" className="logo" />
       </header>
       <Routes>
         <Route path="/" element={<Cards cards={cards} order={order} active={active} setActive={setActive} />} />

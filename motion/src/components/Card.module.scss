@@ -5,29 +5,32 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
 
-  &--expertise {
-    background: var(--card-bg-dark);
-    color: var(--accent);
-    height: 35rem;
+.card--expertise {
+  height: 40rem;
 
-    h2 {
-      font-size: 2rem;
-      margin-bottom: var(--gap);
-    }
-    p {
-      color: var(--text-muted);
-      margin-bottom: var(--gap);
-    }
+  h2 {
+    font-size: 2rem;
+    margin-bottom: var(--gap);
   }
-
-  &--campus,
-  &--history {
-    height: 16rem;
-    h2 {
-      font-size: 1.5rem;
-    }
+  p {
+    color: var(--text-muted);
+    margin-bottom: var(--gap);
   }
+}
+
+.card--campus,
+.card--history {
+  height: 18.5rem;
+
+  h2 {
+    font-size: 1.5rem;
+  }
+}
+
+.card--active {
+  background: var(--card-bg-dark) !important;
 }
 
 .cta {
