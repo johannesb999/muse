@@ -1,0 +1,66 @@
+.timeline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.timelineSvg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.curveWrapper {
+  /* Animiert Spirale auf/ab anhand von JS-Transform */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 20% bottom; /* Ankerpunkt */
+  transition: transform 0.6s ease-in-out;
+}
+
+.timelineCurve {
+  fill: none;
+  stroke: rgba(255,255,255,0.2);
+  stroke-width: 2;
+}
+
+.pointsWrapper {
+  position: relative;
+  height: 100%;
+  transition: transform 0.6s ease-in-out;
+}
+
+.timelinePoint {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #A7FF00;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  transition: box-shadow 0.2s, opacity 0.3s;
+}
+
+.timelinePoint.active {
+  box-shadow: 0 0 8px #A7FF00;
+}
+
+.timelineLabel {
+  position: absolute;
+  transform: translate(-50%, 0);
+  color: #fff;
+  font-size: 0.875rem;
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 0.3s;
+}

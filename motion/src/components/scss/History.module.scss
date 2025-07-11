@@ -1,0 +1,105 @@
+.historyContainer {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: #0a0a0a;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+.historyHeader {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.menuBtn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  margin: 0 4px;
+}
+
+.menuLabel {
+  font-size: 16px;
+  font-weight: 400;
+  color: #fff;
+}
+
+.contentWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 150px);
+  overflow: hidden;
+}
+
+.panels {
+  display: flex;
+  height: 100%;
+  transition: transform 0.9s ease;
+}
+
+.panel {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.left {
+  flex: 0 0 40%;
+  padding: 0 2rem;
+}
+
+.year {
+  font-size: 6rem;
+  font-weight: 300;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.3;
+  margin-bottom: 24px;
+}
+
+.text {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.8);
+  max-width: 70%;
+}
+
+.right {
+  flex: 0 0 55%;
+  padding-right: 2rem;
+}
+
+.right img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
