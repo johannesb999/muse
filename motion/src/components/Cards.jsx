@@ -1,4 +1,4 @@
-import styles from "./Cards.module.scss";
+import styles from "./scss/Cards.module.scss";
 import Card from "./Card";
 import Cta from "./Cta";
 import { useNavigate } from "react-router-dom";

@@ -1,4 +1,4 @@
-import styles from "./Card.module.scss";
+import styles from "./scss/Card.module.scss";
 import { motion } from "motion/react";
 
 export default function Card({
@@ -22,13 +22,13 @@ export default function Card({
       animate={{ scale: isActive ? 1.02 : 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      <h2>{title}</h2>
+      <h2 className={active ? styles.titleActive : undefined}>{title}</h2>
       {isActive && (
         <>
           <p>{content}</p>
-          {children}
         </>
       )}
+      {children}
     </motion.section>
   );
 }
