@@ -34,7 +34,7 @@
   transition: background-color 200ms ease-in-out;
 }
 
-/* Keyframes für 5-Stufen-Fade */
+/* Keyframes für 5-Stufen-Fade von Weiß→Gelb */
 :global {
   @keyframes fadePoint {
     from { background-color: #FFFFFF; }
@@ -46,9 +46,28 @@
   }
 }
 
-/* Klasse, die beim Animieren hinzugefügt wird */
+/* Fade-In (Weiß→Gelb) */
 .fadePoint {
   animation: fadePoint 2s steps(5, end) forwards;
+}
+.fadeLabel {
+  animation: fadeLabel 2s steps(5, end) forwards;
+}
+
+/* Fade-Out (Gelb→Weiß) via umgekehrte Keyframes */
+.fadeOutPoint {
+  animation: fadePoint 1s steps(5, end) reverse forwards;
+}
+.fadeOutLabel {
+  animation: fadeLabel 1s steps(5, end) reverse forwards;
+}
+
+/* Volles Gelb, wenn einmal komplett aktiv */
+.timelinePoint.active {
+  background: #A7FF00;
+}
+.timelineLabel.active {
+  color: #A7FF00;
 }
 
 .timelineLabel {
@@ -63,20 +82,8 @@
   transition: color 200ms ease-in-out;
 }
 
-.fadeLabel {
-  animation: fadeLabel 2s steps(5, end) forwards;
-}
-
-.timelinePoint.active {
-  background: #A7FF00;
-}
-
-.timelineLabel.active {
-  color: #A7FF00;
-}
-
 .timelineCurve {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.2);
+  stroke: rgba(255,255,255,0.2);
   stroke-width: 2;
 }

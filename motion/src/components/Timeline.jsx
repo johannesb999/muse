@@ -6,28 +6,30 @@ export default function Timeline({ items, onSelect }) {
   const anchorPct = 20
   const step      = 80 / (items.length - 1)
 
-  const [offset, setOffset]       = useState(0)
-  const [activeIndex, setActive]  = useState(0)
-  const [targetIndex, setTarget]  = useState(0)
-  const [colorIndex, setColor]    = useState(0)        // Punkt & Label, die gerade verblassen
-  const [isAnimating, setAnimating]= useState(false)
-  const [phase, setPhase]         = useState(0)
-  const [isPointerDown, setDown]  = useState(false)
+  const [offset, setOffset]          = useState(0)
+  const [activeIndex, setActive]     = useState(0)
+  const [targetIndex, setTarget]     = useState(0)
+  const [fadeInIndex,  setFadeIn]    = useState(null)
+  const [fadeOutIndex, setFadeOut]   = useState(null)
+  const [isAnimating, setAnimating]  = useState(false)
+  const [phase,        setPhase]     = useState(0)
+  const [isPointerDown,setDown]      = useState(false)
 
   const containerRef = useRef(null)
   const startX       = useRef(0)
   const rafId        = useRef(null)
   const lastTime     = useRef(0)
 
-  // 1. Anfangs-Snap
+  // 1) Initial-Snap auf ersten Punkt
   useEffect(() => {
     setOffset(anchorPct - 10)
     setActive(0)
-    setColor(0)
+    setFadeIn(null)
+    setFadeOut(null)
     onSelect(0)
   }, [])
 
-  // 2. Wellen-Loop nur bei Swipe/Snap
+  // 2) Loop für organische Welle nur während Swipe/Snap
   useEffect(() => {
     if (isAnimating) {
       lastTime.current = performance.now()
@@ -44,97 +46,95 @@ export default function Timeline({ items, onSelect }) {
     return () => cancelAnimationFrame(rafId.current)
   }, [isAnimating])
 
-  // 3. Dynamische Bézier-CPs
-  const cpA1   = { x: 200,  y: 120 + Math.sin(phase) * 15 }
-  const cpA2   = { x: 300,  y:  30 + Math.cos(phase) * 20 }
-  const cpA2_1 = { x: 800,  y: 150 - cpA2.y }
-  const cpA2_2 = { x:1000,  y:  75 + Math.sin(phase + Math.PI/2) * 10 }
-  const cpB1   = { x: 200,  y:  50 + Math.sin(phase + Math.PI) * 15 }
-  const cpB2   = { x: 300,  y: 140 + Math.cos(phase + Math.PI) * 20 }
-  const cpB2_1 = { x: 800,  y: 200 - cpB2.y }
-  const cpB2_2 = { x:1000,  y: 100 + Math.cos(phase + Math.PI/2) * 10 }
+  // 3) Dynamische Bézier-CPs für die Schlangen-Linien
+  const cpA1   = { x:200,  y:120 + Math.sin(phase)*15 }
+  const cpA2   = { x:300,  y: 30 + Math.cos(phase)*20 }
+  const cpA2_1 = { x:800,  y:150 - cpA2.y }
+  const cpA2_2 = { x:1000, y: 75 + Math.sin(phase+Math.PI/2)*10 }
+  const cpB1   = { x:200,  y: 50 + Math.sin(phase+Math.PI)*15 }
+  const cpB2   = { x:300,  y:140 + Math.cos(phase+Math.PI)*20 }
+  const cpB2_1 = { x:800,  y:200 - cpB2.y }
+  const cpB2_2 = { x:1000, y:100 + Math.cos(phase+Math.PI/2)*10 }
 
-  const pathA =
+  const pathA = 
     `M0,75 C${cpA1.x},${cpA1.y} ${cpA2.x},${cpA2.y} 500,75 ` +
     `S${cpA2_1.x},${cpA2_1.y} ${cpA2_2.x},${cpA2_2.y}`
   const pathB =
     `M0,100 C${cpB1.x},${cpB1.y} ${cpB2.x},${cpB2.y} 500,100 ` +
     `S${cpB2_1.x},${cpB2_1.y} ${cpB2_2.x},${cpB2_2.y}`
 
-  // Bézier-Evaluator
-  const bezierY = (t, p0, p1, p2, p3) =>
-    (1 - t) ** 3 * p0 +
-    3 * (1 - t) ** 2 * t * p1 +
-    3 * (1 - t) * t ** 2 * p2 +
-    t ** 3 * p3
+  const bezierY = (t,p0,p1,p2,p3) =>
+    (1-t)**3*p0 +
+    3*(1-t)**2*t*p1 +
+    3*(1-t)*t**2*p2 +
+    t**3*p3
 
-  // Y-Position auf Kurve
   const calcY = (leftPct, type) => {
-    const t = leftPct / 100
-    if (type === 'history') {
-      return t <= 0.5
-        ? bezierY(t * 2, 75, cpA1.y, cpA2.y, 75)
-        : bezierY((t - 0.5) * 2, 75, cpA2_1.y, cpA2_2.y, 75)
+    const t = leftPct/100
+    if (type==='history') {
+      return t<=0.5
+        ? bezierY(t*2, 75, cpA1.y, cpA2.y, 75)
+        : bezierY((t-0.5)*2, 75, cpA2_1.y, cpA2_2.y, 75)
     }
-    return t <= 0.5
-      ? bezierY(t * 2, 100, cpB1.y, cpB2.y, 100)
-      : bezierY((t - 0.5) * 2, 100, cpB2_1.y, cpB2_2.y, 100)
+    return t<=0.5
+      ? bezierY(t*2, 100, cpB1.y, cpB2.y, 100)
+      : bezierY((t-0.5)*2,100, cpB2_1.y, cpB2_2.y,100)
   }
 
-  // Ziel-Index per Klick/Swipe ermitteln
-  const getNearestIndex = clientX => {
+  // 4) Klick/Swipe: bestimmen, ob neuer Index — dann Fade-Out alten, Fade-In neuen
+  const getNearestIndex = x => {
     const r = containerRef.current.getBoundingClientRect()
-    const pctX = ((clientX - r.left) / r.width) * 100
-    const dists = items.map((_, i) =>
-      Math.abs((10 + i * step + offset) - pctX)
-    )
-    return dists.indexOf(Math.min(...dists))
+    const pct = ((x - r.left)/r.width)*100
+    const d = items.map((_,i)=>Math.abs((10+i*step+offset)-pct))
+    return d.indexOf(Math.min(...d))
   }
 
-  // 4. Animation starten: colorIndex sofort, Snap starten
   const animateTo = idx => {
-    if (idx === activeIndex) return
+    if (idx===activeIndex) return
+    setFadeOut(activeIndex)
+    setFadeIn(idx)
     setTarget(idx)
-    setColor(idx)
     setAnimating(true)
-    setOffset(anchorPct - (10 + idx * step))
+    setOffset(anchorPct - (10+idx*step))
     onSelect(idx)
   }
 
-  const handleSwipeOrClick = (dx, clientX) => {
-    const threshold = containerRef.current.clientWidth * 0.1
-    if (Math.abs(dx) > threshold) {
-      const dir  = dx < 0 ? 1 : -1
-      const nxt  = Math.min(Math.max(activeIndex + dir, 0), items.length - 1)
+  const handleSwipeOrClick = (dx,x) => {
+    const thr = containerRef.current.clientWidth * 0.1
+    if (Math.abs(dx)>thr) {
+      const dir = dx<0?1:-1
+      const nxt = Math.min(Math.max(activeIndex+dir,0),items.length-1)
       animateTo(nxt)
     } else {
-      animateTo(getNearestIndex(clientX))
+      animateTo(getNearestIndex(x))
     }
   }
 
   const onPointerDown = e => {
     containerRef.current.setPointerCapture(e.pointerId)
-    setDown(true)
-    startX.current = e.clientX
+    setDown(true); startX.current = e.clientX
   }
   const onPointerUp = e => {
     if (!isPointerDown) return
-    const dx = e.clientX - startX.current
-    handleSwipeOrClick(dx, e.clientX)
+    handleSwipeOrClick(e.clientX-startX.current, e.clientX)
     setDown(false)
   }
 
-  // 5. Sobald Snap-Transition (2s) aufhört: activeIndex = target & Wave-Loop enden
+  // 5) Nach 2s-Transition: alten ActiveIndex updaten, Animation stoppen, Fades entfernen
   const onTransEnd = e => {
-    if (e.propertyName === 'transform') {
+    if (e.propertyName==='transform') {
       setActive(targetIndex)
       setAnimating(false)
+      setFadeIn(null)
+      setFadeOut(null)
     }
   }
 
   const wrapperStyle = {
     transform: `translateX(${offset}%)`,
-    transition: isAnimating ? 'transform 2s ease-in-out' : 'none'
+    transition: isAnimating
+      ? 'transform 2s ease-in-out'
+      : 'none'
   }
 
   return (
@@ -144,7 +144,11 @@ export default function Timeline({ items, onSelect }) {
       onPointerDown={onPointerDown}
       onPointerUp={onPointerUp}
     >
-      <svg className={styles.timelineSvg} viewBox="0 0 1000 150" preserveAspectRatio="none">
+      <svg
+        className={styles.timelineSvg}
+        viewBox="0 0 1000 150"
+        preserveAspectRatio="none"
+      >
         <g style={wrapperStyle} onTransitionEnd={onTransEnd}>
           <path className={styles.timelineCurve} d={pathA} />
           <path className={styles.timelineCurve} d={pathB} />
@@ -153,12 +157,13 @@ export default function Timeline({ items, onSelect }) {
 
       <div className={styles.pointsWrapper} style={wrapperStyle}>
         {items.map((item, idx) => {
-          const leftPct = 10 + idx * step
+          const leftPct = 10 + idx*step
           const y       = calcY(leftPct, item.type)
-          const isColor = idx === colorIndex
-          const isActive= idx === activeIndex
+          const isActive= idx===activeIndex
+          const isIn    = idx===fadeInIndex
+          const isOut   = idx===fadeOutIndex
           const visX    = leftPct + offset
-          const opacity = visX < -5 || visX > 105 ? 0 : 1
+          const opacity = visX< -5 || visX>105 ? 0 : 1
 
           return (
             <div
@@ -174,8 +179,9 @@ export default function Timeline({ items, onSelect }) {
               <div
                 className={`
                   ${styles.timelinePoint}
-                  ${isActive ? styles.active     : ''}
-                  ${isColor  ? styles.fadePoint  : ''}
+                  ${isActive?styles.active:''}
+                  ${isIn   ?styles.fadePoint:''}
+                  ${isOut  ?styles.fadeOutPoint:''}
                 `}
                 style={{ top: `${y}px` }}
                 role="button"
@@ -184,10 +190,11 @@ export default function Timeline({ items, onSelect }) {
               <div
                 className={`
                   ${styles.timelineLabel}
-                  ${isActive ? styles.active     : ''}
-                  ${isColor  ? styles.fadeLabel  : ''}
+                  ${isActive?styles.active:''}
+                  ${isIn   ?styles.fadeLabel:''}
+                  ${isOut  ?styles.fadeOutLabel:''}
                 `}
-                style={{ top: `${y + 10}px` }}
+                style={{ top: `${y+15}px` }}
               >
                 <span>{item.title}</span><br/>
                 <small>{item.year}</small>
