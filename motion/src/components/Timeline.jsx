@@ -2,208 +2,141 @@
 import React, { useRef, useState, useEffect } from 'react'
 import styles from './scss/Timeline.module.scss'
 
-export default function Timeline({ items, onSelect }) {
+export default function Timeline({
+  items,
+  activeIndex,
+  onSelect,
+  dragOffset = 0  // in [-1,1] von History.jsx hereingereicht
+}) {
+  const viewW     = 1000
+  const baseY1    = 75
+  const baseY2    = 100
   const anchorPct = 20
-  const step = 80 / (items.length - 1)
+  const step      = 80 / (items.length - 1)
+  const k         = ((items.length - 1) * Math.PI) / viewW
+  const amp       = 40
 
-  const [offset, setOffset]               = useState(0)
-  const [activeIndex, setActiveIndex]    = useState(0)
-  const [targetIndex, setTargetIndex]    = useState(0)
-  const [fadeInIndex, setFadeInIndex]    = useState(null)
-  const [fadeOutIndex, setFadeOutIndex]  = useState(null)
-  const [isAnimating, setIsAnimating]    = useState(false)
-  const [phase, setPhase]                = useState(0)
-  const [isPointerDown, setIsPointerDown]= useState(false)
+  // State für Snap-Offset & Freeze
+  const [baseOffset,  setBaseOffset]  = useState(anchorPct - 10)
+  const [isFrozen,    setIsFrozen]    = useState(true)
+  const [fadeInIdx,   setFadeInIdx]   = useState(null)
+  const [fadeOutIdx,  setFadeOutIdx]  = useState(null)
 
-  const containerRef = useRef(null)
-  const startX       = useRef(0)
-  const rafRef       = useRef(null)
-  const lastTimeRef  = useRef(0)
+  // Phase steuert Kurven *und* Punkt-Drift
+  const [phase, setPhase] = useState(Math.PI/2)
+  const raf = useRef(null)
+  const last = useRef(0)
 
-  // 1) Initial Snap
+  // 1) Loop, solange nicht gefroren
   useEffect(() => {
-    setOffset(anchorPct - 10)
-    setActiveIndex(0)
-    onSelect(0)
-  }, [])
-
-  // 2) Animations-Loop nur während Swipe/Snap
-  useEffect(() => {
-    if (isAnimating) {
-      lastTimeRef.current = performance.now()
-      const loop = now => {
-        const delta = now - lastTimeRef.current
-        lastTimeRef.current = now
-        setPhase(p => p + delta * 0.003)  // langsamer für elegantere Helix
-        rafRef.current = requestAnimationFrame(loop)
+    const loop = now => {
+      const delta = now - last.current
+      if (!isFrozen) {
+        setPhase(p => p + delta * 0.0005) // sehr langsam
       }
-      rafRef.current = requestAnimationFrame(loop)
-    } else {
-      cancelAnimationFrame(rafRef.current)
+      last.current = now
+      raf.current = requestAnimationFrame(loop)
     }
-    return () => cancelAnimationFrame(rafRef.current)
-  }, [isAnimating])
+    last.current = performance.now()
+    raf.current = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(raf.current)
+  }, [isFrozen])
 
-  // 3) Gemeinsame Helix-Parameter
-  const helixParams = useRef({
-    ampX: 60,   // horizontale Auslenkung
-    ampY: 20,   // vertikale Auslenkung
-    phaseOffset: Math.random() * Math.PI * 2 // random Startphase
-  }).current
+  // 2) Snap auf activeIndex: Basis-Verschiebung + kurz auftauen
+  useEffect(() => {
+    const newOff = anchorPct - (10 + activeIndex * step)
+    setBaseOffset(newOff)
+    setFadeOutIdx(activeIndex)
+    setFadeInIdx(null)
+    setIsFrozen(false)
+    const t = setTimeout(() => setIsFrozen(true), 2000)
+    return () => clearTimeout(t)
+  }, [activeIndex])
 
-  // 4) Helix-Funktion: X=cos, Y=sin → echte Kreis-/Spiralen-Bewegung
-  const helix = (baseX, baseY, invert=false) => {
-    const { ampX, ampY, phaseOffset } = helixParams
-    const ph = phase + phaseOffset + (invert ? Math.PI : 0)
-    return {
-      x: baseX + Math.cos(ph) * ampX,
-      y: baseY + Math.sin(ph) * ampY
+  // 3) Pfade animieren nur via phase (sinusförmig „atmen“)
+  const buildPath = (baseY, phaseShift = 0) => {
+    const segs = 200, pts = []
+    for (let i = 0; i <= segs; i++) {
+      const x = (viewW / segs) * i
+      const y = baseY + amp * Math.sin(k * x + phase + phaseShift)
+      pts.push([x, y])
     }
+    return pts.reduce((d,[x,y],i) =>
+      i===0 ? `M${x},${y}` : `${d} L${x},${y}`
+    , '')
+  }
+  const pathA = buildPath(baseY1, 0)
+  const pathB = buildPath(baseY2, Math.PI)
+
+  // 4) Punkte wandern entlang der Kurve: leftPct + drift, y über dieselbe Formel
+  const speed = 0.02 // Drift pro Phase-Einheit in Prozent
+  const calcDynamicPct = (basePct) => basePct + (phase * speed * 100)
+  const calcY = (xPct, type) => {
+    const x = (viewW * (xPct/100))
+    const baseY = type==='history' ? baseY1 : baseY2
+    const shift = type==='history' ? 0 : Math.PI
+    return baseY + amp * Math.sin(k * x + phase + shift)
   }
 
-  // Control-Points der beiden Kurven (starten kreuzend)
-  const cpA1 = helix(200, 75,  false)
-  const cpA2 = helix(300, 75,  false)
-  const cpA3 = helix(700, 75,  false)
-  const cpA4 = helix(900, 75,  false)
-
-  const cpB1 = helix(200, 75,  true)
-  const cpB2 = helix(300, 75,  true)
-  const cpB3 = helix(700, 75,  true)
-  const cpB4 = helix(900, 75,  true)
-
-  const pathA =
-    `M0,75 C${cpA1.x},${cpA1.y} ${cpA2.x},${cpA2.y} 500,75 ` +
-    `S${cpA3.x},${cpA3.y} ${cpA4.x},${cpA4.y}`
-
-  const pathB =
-    `M0,100 C${cpB1.x},${cpB1.y} ${cpB2.x},${cpB2.y} 500,100 ` +
-    `S${cpB3.x},${cpB3.y} ${cpB4.x},${cpB4.y}`
-
-  // Bézier-Interpolator für Punkt-Y
-  const bezierY = (t,p0,p1,p2,p3) =>
-    (1-t)**3*p0 + 3*(1-t)**2*t*p1 + 3*(1-t)*t**2*p2 + t**3*p3
-
-  const calcY = (leftPct, type) => {
-    const t = leftPct / 100
-    if (type==='history') {
-      return t<=0.5
-        ? bezierY(t*2, 75, cpA1.y, cpA2.y, 75)
-        : bezierY((t-0.5)*2, 75, cpA3.y, cpA4.y, 75)
-    }
-    return t<=0.5
-      ? bezierY(t*2,100,cpB1.y,cpB2.y,100)
-      : bezierY((t-0.5)*2,100,cpB3.y,cpB4.y,100)
-  }
-
-  // 5) Klick/Swipe → Fade-Out alten, Fade-In neuen Punkt
-  const getNearest = x => {
-    const r = containerRef.current.getBoundingClientRect()
-    const pct = ((x-r.left)/r.width)*100
-    const dists = items.map((_,i)=>Math.abs((10+i*step+offset)-pct))
-    return dists.indexOf(Math.min(...dists))
-  }
+  // 5) Klick auf Punkt → Fade + onSelect
   const animateTo = idx => {
     if (idx===activeIndex) return
-    setFadeOutIndex(activeIndex)
-    setFadeInIndex(idx)
-    setTargetIndex(idx)
-    setIsAnimating(true)
-    setOffset(anchorPct - (10 + idx*step))
+    setFadeOutIdx(activeIndex)
+    setFadeInIdx(idx)
     onSelect(idx)
   }
-  const handleSwipeOrClick = (dx,x) => {
-    const thr = containerRef.current.clientWidth * 0.1
-    if (Math.abs(dx)>thr) {
-      const dir = dx<0?1:-1
-      const nxt = Math.min(Math.max(activeIndex+dir,0),items.length-1)
-      animateTo(nxt)
-    } else {
-      animateTo(getNearest(x))
-    }
-  }
-  const onPointerDown = e => {
-    containerRef.current.setPointerCapture(e.pointerId)
-    setIsPointerDown(true)
-    startX.current = e.clientX
-  }
-  const onPointerUp = e => {
-    if (!isPointerDown) return
-    handleSwipeOrClick(e.clientX - startX.current, e.clientX)
-    setIsPointerDown(false)
-  }
 
-  // 6) Nach 2s-Transition Ende: finalisieren & aufräumen
-  const onTransEnd = e => {
-    if (e.propertyName==='transform') {
-      setActiveIndex(targetIndex)
-      setIsAnimating(false)
-      setFadeInIndex(null)
-      setFadeOutIndex(null)
-    }
-  }
-
+  // 6) Gesamtoffset = Snap + Drag in %
+  const totalOffset = baseOffset + dragOffset * 100
   const wrapperStyle = {
-    transform: `translateX(${offset}%)`,
-    transition: isAnimating ? 'transform 2s ease-in-out' : 'none'
+    transform: `translateX(${totalOffset}%)`,
+    transition: isFrozen ? 'none' : 'transform 2s ease-in-out'
   }
 
   return (
-    <div
-      ref={containerRef}
-      className={styles.timeline}
-      onPointerDown={onPointerDown}
-      onPointerUp={onPointerUp}
-    >
-      <svg
-        className={styles.timelineSvg}
-        viewBox="0 0 1000 150"
-        preserveAspectRatio="none"
-      >
-        <g style={wrapperStyle} onTransitionEnd={onTransEnd}>
+    <div className={styles.timeline}>
+      <svg className={styles.timelineSvg} viewBox="0 0 1000 150" preserveAspectRatio="none">
+        <g style={wrapperStyle}>
           <path className={styles.timelineCurve} d={pathA} />
           <path className={styles.timelineCurve} d={pathB} />
         </g>
       </svg>
-
       <div className={styles.pointsWrapper} style={wrapperStyle}>
         {items.map((item, idx) => {
-          const leftPct = 10 + idx*step
-          const y = calcY(leftPct, item.type)
-          const isActive = idx===activeIndex
-          const isIn    = idx===fadeInIndex
-          const isOut   = idx===fadeOutIndex
-          const visX    = leftPct + offset
-          const opacity = visX< -5 || visX>105 ? 0 : 1
+          const basePct = 10 + idx*step
+          const xPct    = calcDynamicPct(basePct)
+          const y       = calcY(xPct, item.type)
+          const isA     = idx===activeIndex
+          const isI     = idx===fadeInIdx
+          const isO     = idx===fadeOutIdx
+          const vis     = xPct + totalOffset
+          const op      = vis < -5 || vis > 105 ? 0 : 1
 
           return (
-            <div
-              key={idx}
-              style={{
-                position:'absolute',
-                left:`${leftPct}%`,
-                top:0,
-                opacity,
-                transition:'opacity 2s ease-in-out'
-              }}
-            >
+            <div key={idx} style={{
+              position:'absolute',
+              left:    `${xPct}%`,
+              top:     0,
+              opacity: op,
+              transition: 'opacity 2s ease-in-out'
+            }}>
               <div
+                onClick={()=>animateTo(idx)}
+                role="button" tabIndex={0}
                 className={`
                   ${styles.timelinePoint}
-                  ${isActive?styles.active:''}
-                  ${isIn?styles.fadePoint:''}
-                  ${isOut?styles.fadeOutPoint:''}
+                  ${isA?styles.active:''}
+                  ${isI?styles.fadePoint:''}
+                  ${isO?styles.fadeOutPoint:''}
                 `}
                 style={{ top:`${y}px` }}
-                role="button"
-                tabIndex={0}
               />
               <div
                 className={`
                   ${styles.timelineLabel}
-                  ${isActive?styles.active:''}
-                  ${isIn?styles.fadeLabel:''}
-                  ${isOut?styles.fadeOutLabel:''}
+                  ${isA?styles.active:''}
+                  ${isI?styles.fadeLabel:''}
+                  ${isO?styles.fadeOutLabel:''}
                 `}
                 style={{ top:`${y+15}px` }}
               >

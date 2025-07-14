@@ -31,6 +31,18 @@ const timelineItems = [
   {
     year: '2024',
     title: 'Der neue SGP Campus in Neu-Ulm',
+    text: `2024 wurde der moderne SGP Campus eröffnet – ein Zent<rum für Beratung, Forschung und Lehre.`,
+    img: '/assets/historie-2024.png',
+    type: 'history',
+  },{
+    year: '2024',
+    title: 'Der neue SGP Campus in Neu-Ulm',
+    text: `2024 wurde der moderne SGP Campus eröffnet – ein Zentrum für Beratung, Forschung und Lehre.`,
+    img: '/assets/historie-2024.png',
+    type: 'history',
+  },{
+    year: '2024',
+    title: 'Der neue SGP Campus in Neu-Ulm',
     text: `2024 wurde der moderne SGP Campus eröffnet – ein Zentrum für Beratung, Forschung und Lehre.`,
     img: '/assets/historie-2024.png',
     type: 'history',
