@@ -25,7 +25,7 @@ const timelineItems = [
     year: '2000',
     title: 'Insolvenzverwaltung',
     text: `Ab 2000 erfolgte der Ausbau der Insolvenzverwaltung mit mehreren Großmandaten in der Region.`,
-    img: '/assets/historie-2000.png',
+    img: '/assets/historie-2012.png',
     type: 'case',
   },
   {

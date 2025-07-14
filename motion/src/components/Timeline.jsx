@@ -3,82 +3,141 @@ import React, { useRef, useState, useEffect } from 'react'
 import styles from './scss/Timeline.module.scss'
 
 export default function Timeline({ items, onSelect }) {
-  const anchorPct = 20                      // Anker bei 20 %
-  const step = 80 / (items.length - 1)      // Prozentabstand zwischen Punkten
-  const [offset, setOffset] = useState(0)   // globaler Offset in %
+  const anchorPct = 20
+  const step = 80 / (items.length - 1)
+  const [offset, setOffset] = useState(0)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [isPointerDown, setIsPointerDown] = useState(false)
+  const [dragging, setDragging] = useState(false)
+
   const containerRef = useRef(null)
   const startX = useRef(0)
   const startOffset = useRef(0)
-  const [dragging, setDragging] = useState(false)
 
-  // Zentriert Punkt 0 initial im Anker
+  // Initial: Punkt 0 in den Anchor snappen
   useEffect(() => {
-    setOffset(anchorPct - (10 + 0 * step))
+    const initialLeft = 10
+    setOffset(anchorPct - initialLeft)
     setActiveIndex(0)
+    onSelect(0)
   }, [])
 
-  // Pointer-Events fürs Draggen
-  const onPointerDown = e => {
-    containerRef.current.setPointerCapture(e.pointerId)
-    startX.current = e.clientX
-    startOffset.current = offset
-    setDragging(true)
-  }
-  const onPointerMove = e => {
-    if (!dragging) return
-    const deltaX = e.clientX - startX.current
-    const w = containerRef.current.clientWidth
-    const newOffset = startOffset.current + (deltaX / w) * 100
-    setOffset(newOffset)
-    // während Drag: aktiviere den Punkt, der in den Anker wandert
-    const distances = items.map((_, i) =>
-      Math.abs((10 + i * step) + newOffset - anchorPct)
-    )
-    const newActive = distances.indexOf(Math.min(...distances))
-    setActiveIndex(newActive)
-  }
-  const onPointerUp = e => {
-    containerRef.current.releasePointerCapture(e.pointerId)
-    setDragging(false)
-    // snappe auf den aktiven Index
-    const snapOffset = anchorPct - (10 + activeIndex * step)
-    setOffset(snapOffset)
-    onSelect(activeIndex)
-  }
-
-  // Bezier‐Approximation für Y-Werte
+  // Bézier‐Evaluator
   const bezierY = (t, p0, p1, p2, p3) =>
     (1 - t) ** 3 * p0 +
     3 * (1 - t) ** 2 * t * p1 +
     3 * (1 - t) * t ** 2 * p2 +
     t ** 3 * p3
 
-  const calcY = (pct, type) => {
-    const t = pct / 100
-    return type === 'history'
-      ? bezierY(t, 75, 120, 30, 75)
-      : bezierY(t, 100, 50, 140, 100)
+  // Exakte Y‐Berechnung entlang der SVG‐Segmente
+  const calcY = (leftPct, type) => {
+    const t = leftPct / 100
+    if (type === 'history') {
+      if (t <= 0.5) {
+        const u = t * 2
+        return bezierY(u, 75, 120, 30, 75)
+      } else {
+        const u = (t - 0.5) * 2
+        return bezierY(u, 75, 120, 120, 75)
+      }
+    } else {
+      if (t <= 0.5) {
+        const u = t * 2
+        return bezierY(u, 100, 50, 140, 100)
+      } else {
+        const u = (t - 0.5) * 2
+        return bezierY(u, 100, 60, 50, 100)
+      }
+    }
   }
 
-  // Statische Kurven
-  const pathA = 'M0,75 C200,120 300,30 500,75 S800,120 1000,75'
-  const pathB = 'M0,100 C200,50 300,140 500,100 S800,50 1000,100'
+  // Hilfs‐Funktion: aus clientX → nächster Index
+  const getNearestIndexByClientX = clientX => {
+    const rect = containerRef.current.getBoundingClientRect()
+    const pctX = ((clientX - rect.left) / rect.width) * 100
+    const dists = items.map((_, i) =>
+      Math.abs((10 + i * step + offset) - pctX)
+    )
+    return dists.indexOf(Math.min(...dists))
+  }
+
+  // Klick‐Logik (Snap + Select)
+  const handleClickAt = clientX => {
+    const idx = getNearestIndexByClientX(clientX)
+    const finalLeft = 10 + idx * step
+    setOffset(anchorPct - finalLeft)
+    setActiveIndex(idx)
+    onSelect(idx)
+  }
+
+  // Pointer‐Down: Maustaste gedrückt
+  const onPointerDown = e => {
+    containerRef.current.setPointerCapture(e.pointerId)
+    setIsPointerDown(true)
+    setDragging(false)
+    startX.current = e.clientX
+    startOffset.current = offset
+  }
+
+  // Pointer‐Move: nur wenn Maustaste gedrückt
+  const onPointerMove = e => {
+    if (!isPointerDown) return
+    const dx = ((e.clientX - startX.current) / containerRef.current.clientWidth) * 100
+    if (!dragging && Math.abs(dx) > 0.5) {
+      setDragging(true)
+    }
+    if (dragging) {
+      const newOffset = startOffset.current + dx
+      setOffset(newOffset)
+      // aktives Item während Drag updaten
+      const dists = items.map((_, i) =>
+        Math.abs((10 + i * step) + newOffset - anchorPct)
+      )
+      const newActive = dists.indexOf(Math.min(...dists))
+      if (newActive !== activeIndex) {
+        setActiveIndex(newActive)
+        onSelect(newActive)
+      }
+    }
+  }
+
+  // Pointer‐Up: Drag-End oder Klick
+  const onPointerUp = e => {
+    containerRef.current.releasePointerCapture(e.pointerId)
+    if (dragging) {
+      // Snap-Ende
+      const dists = items.map((_, i) =>
+        Math.abs((10 + i * step) + offset - anchorPct)
+      )
+      const newActive = dists.indexOf(Math.min(...dists))
+      const finalLeft = 10 + newActive * step
+      setOffset(anchorPct - finalLeft)
+      setActiveIndex(newActive)
+      onSelect(newActive)
+    } else {
+      // Klick
+      handleClickAt(e.clientX)
+    }
+    setDragging(false)
+    setIsPointerDown(false)
+  }
 
   const wrapperStyle = {
     transform: `translateX(${offset}%)`,
     transition: dragging ? 'none' : 'transform 0.6s ease-in-out'
   }
+  const pathA = 'M0,75 C200,120 300,30 500,75 S800,120 1000,75'
+  const pathB = 'M0,100 C200,50 300,140 500,100 S800,50 1000,100'
 
   return (
     <div
-      className={styles.timeline}
       ref={containerRef}
+      className={styles.timeline}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
     >
-      {/* Kurven */}
+      {/* SVG‐Kurven */}
       <svg
         className={styles.timelineSvg}
         viewBox="0 0 1000 150"
@@ -96,7 +155,6 @@ export default function Timeline({ items, onSelect }) {
           const leftPct = 10 + idx * step
           const y = calcY(leftPct, item.type)
           const isActive = idx === activeIndex
-          // optional: fade außerhalb
           const visX = leftPct + offset
           const opacity = visX < -5 || visX > 105 ? 0 : 1
 
@@ -115,18 +173,19 @@ export default function Timeline({ items, onSelect }) {
                   isActive ? styles.active : ''
                 }`}
                 style={{ top: `${y}px` }}
-                onClick={() => {
-                  setActiveIndex(idx)
-                  // snap direkt
-                  setOffset(anchorPct - leftPct)
-                  onSelect(idx)
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ')
+                    handleClickAt(startX.current)
                 }}
               />
               <div
                 className={styles.timelineLabel}
                 style={{ top: `${y + 15}px` }}
               >
-                <span>{item.title}</span><br/>
+                <span>{item.title}</span>
+                <br />
                 <small>{item.year}</small>
               </div>
             </div>

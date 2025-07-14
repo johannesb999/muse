@@ -14,7 +14,7 @@ export default function Cards({ cards, order, active, setActive }) {
     setLeaving(true);
     setTimeout(() => {
       navigate(`/${order[idx]}`);
-    }, 400); // Dauer der Animation
+    }, 1200); // Dauer der Animation
   };
 
   return (
