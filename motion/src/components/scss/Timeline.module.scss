@@ -1,16 +1,16 @@
-/* src/components/scss/Timeline.module.scss */
-
 .timeline {
   position: absolute;
-  bottom: 0; left: 0;
-  width: 100%; height: 150px;
+  left: 0; bottom: 0;
+  width: 100%;
+  height: 150px;
   overflow: hidden;
 }
 
 .timelineSvg {
   position: absolute;
   top: 0; left: 0;
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 .pointsWrapper {
@@ -18,39 +18,54 @@
   height: 100%;
 }
 
+/* -------------------------------------------------- Kurven */
 .timelineCurve {
   fill: none;
-  stroke: rgba(255,255,255,0.2);
+  stroke: rgba(255, 255, 255, 0.25);
   stroke-width: 2;
 }
 
+/* -------------------------------------------------- Punkte */
 .timelinePoint {
   position: absolute;
-  width: 12px; height: 12px;
-  background: #fff;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  transform: translate(-50%,-50%);
+  transform: translate(-50%, -50%);
   cursor: pointer;
-  transition: background-color 200ms ease-in-out;
+  background: #ffffff;
+  transition: background-color 200ms ease;
 }
-.timelinePoint.active { background: #A7FF00; }
 
+.trackHistory { box-shadow: 0 0 0 2px #ffffffaa; }
+.trackCase    { box-shadow: 0 0 0 2px #ffffff55; }
+
+/* Gelb beim Eintritt in Anchor */
+.inAnchor.timelinePoint  { background: #cffe5f; }
+
+/* kräftig Gelb + Halo wenn exakt auf Mid‑Linie */
+.active.timelinePoint {
+  background: #A7FF00;
+  box-shadow: 0 0 0 6px rgba(167, 255, 0, 0.18);
+}
+
+/* -------------------------------------------------- Labels */
 .timelineLabel {
   position: absolute;
-  left: 50%; transform: translateX(-50%);
+  left: 50%;
+  transform: translateX(-50%);
   white-space: nowrap;
-  color: #fff;
   font-size: 0.75rem;
+  color: #ffffff;
   pointer-events: none;
-  transition: color 200ms ease-in-out;
+  transition: color 200ms ease, background-color 200ms ease;
 }
-.timelineLabel.active { color: #A7FF00; }
 
-:global {
-  @keyframes fadePoint { from{background:#fff;} to{background:#A7FF00;} }
-  @keyframes fadeLabel { from{color:#fff;} to{color:#A7FF00;} }
+.inAnchor.timelineLabel { color: #cffe5f; }
+
+.active.timelineLabel {
+  color: #A7FF00;
+  background: rgba(167, 255, 0, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
-.fadePoint    { animation: fadePoint 2s steps(5,end) forwards; }
-.fadeLabel    { animation: fadeLabel 2s steps(5,end) forwards; }
-.fadeOutPoint { animation: fadePoint 2s steps(5,end) reverse forwards; }
-.fadeOutLabel { animation: fadeLabel 2s steps(5,end) reverse forwards; }
