@@ -93,14 +93,7 @@ export default function History() {
   return (
     <div className={styles.historyContainer}>
       {/* HEADER */}
-      <div className={styles.historyHeader}>
-        <div className={styles.menuBtn}>
-          <span className={styles.dot} />
-          <span className={styles.dot} />
-          <span className={styles.dot} />
-        </div>
-        <div className={styles.menuLabel}>Menu</div>
-      </div>
+      <div className={styles.historyHeader}></div>
 
       {/* PANELS */}
       <div

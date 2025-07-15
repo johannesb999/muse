@@ -1,12 +1,21 @@
+
+
+/* Übergeordneter Full‑Screen‑Container */
 .historyContainer {
   position: relative;
-  width: 100vw;
-  height: 100vh;
-  background: #0a0a0a;
-  overflow: hidden;
+  width: 100%;              
+  max-width: 100%;         
+  height: 90svh;           
+  background: (var(--bg));
+  overflow-x: hidden;       
+  overflow-y: auto;         
   font-family: 'Inter', sans-serif;
+  overscroll-behavior: contain; /* verhindert iOS‑Bounce seitlich */
 }
 
+/* -------------------------------------------------------------- */
+/* Header */
+/* -------------------------------------------------------------- */
 .historyHeader {
   position: absolute;
   top: 24px;
@@ -43,42 +52,53 @@
   color: #fff;
 }
 
+/* -------------------------------------------------------------- */
+/* Haupt‑Content */
+/* -------------------------------------------------------------- */
 .contentWrapper {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 100%;              /* Viewportweit, ohne 100vw‑Versatz */
   height: calc(100% - 150px);
-  overflow: hidden;
+  overflow: hidden;         /* Kinder verwalten eigenes Scrollen/Transforms */
 }
 
+/* Horizontale Slider‑Rail */
 .panels {
   display: flex;
+  flex-wrap: nowrap;        /* Verhindert Zeilenumbruch */
   height: 100%;
   transition: transform 0.9s ease;
+  will-change: transform;   /* glatteres Sliding */
 }
 
+/* Panel – nimmt immer exakt die Breite des Wrappers ein */
 .panel {
-  flex: 0 0 100%;
+  flex: 0 0 100%;           /* exakt eine „Seite“ pro Panel */
+  min-width: 100%;          /* verhindert Shrink → kein Überlauf */
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0 clamp(1rem, 4vw, 2rem);
 }
 
+/* Linke Spalte (Text) */
 .left {
   flex: 0 0 40%;
-  padding: 0 2rem;
+  min-width: 0;             /* lässt Inhalte schrumpfen */
+  padding-right: 2rem;
 }
 
 .year {
-  font-size: 6rem;
+  font-size: clamp(3rem, 8vw, 6rem); /* responsiv */
   font-weight: 300;
   color: #fff;
   margin-bottom: 16px;
 }
 
 .title {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: 400;
   color: #fff;
   line-height: 1.3;
@@ -88,18 +108,45 @@
 .text {
   font-size: 1rem;
   line-height: 1.5;
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
   max-width: 70%;
 }
 
+/* Rechte Spalte (Bild) */
 .right {
   flex: 0 0 55%;
+  min-width: 0;             /* wichtig für Flexbox‑Overflow */
   padding-right: 2rem;
 }
 
 .right img {
-  width: 100%;
+  width: 100%;              /* skaliert im Panel */
   height: auto;
+  max-width: 100%;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  object-fit: cover;        /* beschneidet, statt überzulaufen */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* -------------------------------------------------------------- */
+/* Globale Utilities (optional) */
+/* -------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .panel {
+    flex-direction: column;
+    justify-content: center;
+    gap: 2rem;
+  }
+
+  .left,
+  .right {
+    flex: 1 1 auto;
+    padding: 0 1.5rem;
+    text-align: center;
+  }
+
+  .text {
+    max-width: 100%;
+    margin: 0 auto;
+  }
 }
