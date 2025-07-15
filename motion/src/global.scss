@@ -1,12 +1,18 @@
 :root {
+  //colors
   --bg: #000;
   --card-bg: #111;
   --card-bg-dark: #e0ff460b;
   --accent: #E0FF46;
   --text-light: #eee;
   --text-muted: #ccd;
-  --radius: 1rem;
+
+  //dimensions
+
+  --radius: 24px;
   --gap: 3rem;
+ 
+  //text-styles
 }
 
 * {

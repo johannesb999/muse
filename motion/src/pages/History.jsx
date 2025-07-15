@@ -11,6 +11,7 @@ const timelineItems = [
     und bot von Beginn an Wirtschaftsprüfung, Steuer- und Rechtsberatung, Corporate Finance, 
     Nachlassverwaltung, Restrukturierung und Insolvenzverwaltung an.`,
     img: "/assets/historie-1972.png",
+    //track: "A",
     type: "history",
   },
   {
@@ -19,6 +20,7 @@ const timelineItems = [
     text: `Der Eintritt von Arndt Geiwitz prägte die zukünftige Ausrichtung und Reputation von SGP 
     maßgeblich. Seine Mandate wurden öffentlichkeitswirksam und hoben die Expertise der Kanzlei hervor.`,
     img: "/assets/historie-1995.png",
+    //track: "B",
     type: "history",
   },
   {
@@ -26,30 +28,33 @@ const timelineItems = [
     title: "Insolvenzverwaltung",
     text: `Ab 2000 erfolgte der Ausbau der Insolvenzverwaltung mit mehreren Großmandaten in der Region.`,
     img: "/assets/historie-2012.png",
+    //track: "A",
     type: "case",
   },
   {
     year: "2024",
-    title: "Der neue SGP Campus in Neu-Ulm",
+    title: "Der neue SGP Campus \n in Neu-Ulm",
     text: `2024 wurde der moderne SGP Campus eröffnet – ein Zent<rum für Beratung, Forschung und Lehre.`,
     img: "/assets/historie-2024.png",
+    //track: "B",
     type: "history",
   },
   {
-    year: "2024",
-    title: "Der neue SGP Campus in Neu-Ulm",
+    year: "2025",
+    title: " neue SGP Campus in Neu-Ulm",
     text: `2024 wurde der moderne SGP Campus eröffnet – ein Zentrum für Beratung, Forschung und Lehre.`,
     img: "/assets/historie-2024.png",
-    type: "history",
+    //track: "A",
+    type: "case",
   },
   {
-    year: "2024",
-    title: "Der neue SGP Campus in Neu-Ulm",
+    year: "2026",
+    title: "Der  SGP Campus in Neu-Ulm",
     text: `2024 wurde der moderne SGP Campus eröffnet – ein Zentrum für Beratung, Forschung und Lehre.`,
     img: "/assets/historie-2024.png",
+    //track: "B",
     type: "history",
   },
-  
 ];
 
 export default function History() {

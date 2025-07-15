@@ -1,10 +1,7 @@
-// src/components/Timeline.jsx
+
+
 import React, {
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
-  useCallback
+  useState, useEffect, useRef, useMemo, useCallback
 } from 'react';
 import styles from './scss/Timeline.module.scss';
 
@@ -12,189 +9,222 @@ export default function Timeline({
   items,
   activeIndex,
   onSelect,
-  dragOffset = 0          // normalisiert (‑1 … 1) aus History.jsx
+  dragOffset = 0,               //  −1 … 1  (normalisiert vom übergeordneten Wrapper)
+  height      = 170,            // visuelle Höhe der Timeline (kann > 150 px für 3‑zeilige Labels sein)
+  curveColors = {               // Standard‑Farben (hellgrau)
+    A: 'rgba(255,255,255,0.25)',
+    B: 'rgba(255,255,255,0.25)'
+  }
 }) {
-  /* --------------------------------------------------------------------- *
-   *   Grundparameter                                                      *
-   * --------------------------------------------------------------------- */
-  const viewW   = 1000;
-  const viewH   = 150;
-  const baseY_A = 75;         // oberes Gleis (type === 'history')
-  const baseY_B = 100;        // unteres Gleis (alle anderen Typen)
-  const ampl    = 50;
-  const k       = (2.5 * Math.PI) / viewW;          // volle Welle auf 1000 px
-  const curveTilt = 0.4;                          // Kurven kippen 20 % mit
+  /* ───────────────────────── Geometrische Ableitungen ────────────────── */
+  const AMP        = height * 0.26;  // ≈ 26 % der Gesamt‑Höhe
+  const TRACK_GAP  = height * 0.1;  // vertikaler Abstand der beiden Gleise
+  const baseY_A    = height / 2 - TRACK_GAP;
+  const baseY_B    = height / 2 + TRACK_GAP;
 
-  /* --------------------------------------------------------------------- *
-   *   feste Kurven + Lookup‑Tabellen                                      *
-   * --------------------------------------------------------------------- */
+  const SPACING_PX = 300;           // Abstand Punkt ↔ Punkt
+  const CURVE_TILT = 0.4;          // Kurve kippt 20 % der Punktbewegung mit
+  const SWAY_MAX   = 5;             // maximale Sway‑Amplitude (px)
+  const FADE_START =  200;           // 40 px vor VP‑Rand beginnt Fade‑Out
+  const FADE_END   = -60;           // 60 px ausserhalb ist 0 Opacity
+
+  /* ───────────────────────── Viewport‑Breite ermitteln ────────────────── */
+  const vpRef = useRef(null);
+  const [vpW, setVpW] = useState(window.innerWidth);
+  useEffect(() => {
+    const update = () => setVpW(vpRef.current?.clientWidth || window.innerWidth);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  /* ───────────────────────── Gesamtlänge & Kurven‑Lookup ─────────────── */
+  const LEFT_MARGIN  = vpW * 0.25;                    // = Anchor‑Mitte x‑Pixel
+  const RIGHT_MARGIN = vpW * 0.25;
+  const totalW       = LEFT_MARGIN + RIGHT_MARGIN + (items.length - 1) * SPACING_PX;
+
   const { pathA, pathB, lookupA, lookupB } = useMemo(() => {
-    const build = (baseY, phaseShift = 0) => {
+    const k = (2.5 * Math.PI) / totalW;                 // exakt eine Welle auf totalW
+    const build = (baseY, phase = 0) => {
       let d = '';
-      const lu = new Array(viewW + 1);
-      for (let x = 0; x <= viewW; x++) {
-        const y = baseY + ampl * Math.sin(k * x + phaseShift);
+      const lu = new Array(totalW + 1);
+      for (let x = 0; x <= totalW; x++) {
+        const y = baseY + AMP * Math.sin(k * x + phase);
         lu[x] = y;
-        d += x === 0 ? `M${x},${y}` : ` L${x},${y}`;
+        d += x ? ` L${x},${y}` : `M${x},${y}`;
       }
       return { d, lu };
     };
     const a = build(baseY_A, 0);
     const b = build(baseY_B, Math.PI);
     return { pathA: a.d, pathB: b.d, lookupA: a.lu, lookupB: b.lu };
-  }, [viewW, baseY_A, baseY_B, ampl, k]);
+  }, [totalW, AMP, baseY_A, baseY_B]);
 
-  /* --------------------------------------------------------------------- *
-   *   Punkt‑Grundverteilung (10 %–90 %)                                   *
-   * --------------------------------------------------------------------- */
-  const stepPct = items.length > 1 ? 80 / (items.length - 1) : 0;
+  /* ───────────────────────── X‑Grundkoordinaten aller Punkte ─────────── */
+  const baseX = useMemo(
+    () => items.map((_, i) => LEFT_MARGIN + i * SPACING_PX),
+    [items.length, LEFT_MARGIN]
+  );
 
-  /* --------------------------------------------------------------------- *
-   *   States für Snap‑ und Sway‑Animation                                 *
-   * --------------------------------------------------------------------- */
-  const [offsetPct,  setOffsetPct ] = useState(0);   // horizontale Verschiebung
-  const [isSnapping, setIsSnapping] = useState(false);
-  const [swayPhase,  setSwayPhase ] = useState(0);   // 0 … 2π
+  /* ───────────────────────── Animations‑State ─────────────────────────── */
+  const [offsetX, setOffsetX] = useState(totalW); // Intro: ganz rechts
+  const [isSnapping, setIsSnapping] = useState(true);
+  const [swayPhase,  setSwayPhase ] = useState(0);
+  const [snapProg,   setSnapProg  ] = useState(0); // 0 … 1
   const rafSnap = useRef(null);
   const rafSway = useRef(null);
+  const easeOut = t => 1 - (1 - t) ** 3;
 
-  /* ---------- EaseInOutQuad -------------------------------------------- */
-  const ease = t => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
-
-  /* --------------------------------------------------------------------- *
-   *   Snap‑Animation                                                      *
-   * --------------------------------------------------------------------- */
+  /* Snap‑/Intro‑Animation */
   useEffect(() => {
     const start   = performance.now();
-    const fromOff = offsetPct;
-    const target  = 25 - (10 + activeIndex * stepPct); // 25 % == Anchor‑Mitte
+    const from    = offsetX;
+    const targetX = LEFT_MARGIN - baseX[activeIndex]; // Punkt zur Anker‑Mitte
 
-    setIsSnapping(true);           // Sway darf laufen
+    setIsSnapping(true);
 
     const step = now => {
-      const p = Math.min((now - start) / 2000, 1);        // 2 s
-      setOffsetPct(fromOff + (target - fromOff) * ease(p));
-
+      const p = Math.min((now - start) / 2000, 1);
+      setSnapProg(p);
+      setOffsetX(from + (targetX - from) * easeOut(p));
       if (p < 1) {
         rafSnap.current = requestAnimationFrame(step);
       } else {
-        setIsSnapping(false);      // Snap fertig → Sway stoppen
-        setSwayPhase(0);           // Phase zurücksetzen für nächste Animation
+        setIsSnapping(false); setSwayPhase(0); setSnapProg(0);
       }
     };
-
     cancelAnimationFrame(rafSnap.current);
     rafSnap.current = requestAnimationFrame(step);
 
     return () => cancelAnimationFrame(rafSnap.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeIndex, stepPct]);      // NICHT offsetPct hier eintragen!
+  }, [activeIndex, baseX, LEFT_MARGIN]);
 
-  /* --------------------------------------------------------------------- *
-   *   Sway‑Loop (läuft nur während Snap)                                  *
-   * --------------------------------------------------------------------- */
+  /* Sway (nur während Snap) */
   useEffect(() => {
-    if (!isSnapping) return;       // nichts zu tun, wenn statisch
-
+    if (!isSnapping) return;
     const loop = () => {
-      setSwayPhase(p => p + 0.015);                   // ~2 s für volle Sinus‑Periode
+      setSwayPhase(p => p + 0.018);              // ~1,75 s pro Sinus
       rafSway.current = requestAnimationFrame(loop);
     };
     rafSway.current = requestAnimationFrame(loop);
-
     return () => cancelAnimationFrame(rafSway.current);
   }, [isSnapping]);
 
-  /* --------------------------------------------------------------------- *
-   *   Hilfs‑Funktion: exakter Y‑Wert eines Punkts                         *
-   * --------------------------------------------------------------------- */
+  const swayX = isSnapping ? Math.sin(swayPhase) * SWAY_MAX * (1 - snapProg) : 0;
+
+  /* Y‑Lookup */
   const getY = useCallback(
-    (basePct, type) => {
-      const relPct = basePct + offsetPct * (1 - curveTilt); // reale X‑Position
-      const clampedPct = Math.max(0, Math.min(100, relPct));
-      const x = Math.round((clampedPct / 100) * viewW);
-      return type === 'history' ? lookupA[x] : lookupB[x];
+    (x, track) => {
+      const relX = x + offsetX * (1 - CURVE_TILT);
+      const idx  = Math.max(0, Math.min(totalW, Math.round(relX)));
+      return track === 'A' ? lookupA[idx] : lookupB[idx];
     },
-    [offsetPct, lookupA, lookupB, curveTilt, viewW]
+    [offsetX, lookupA, lookupB, totalW]
   );
 
-  /* --------------------------------------------------------------------- *
-   *   Anchor‑Definition                                                   *
-   * --------------------------------------------------------------------- */
-  const ANCHOR_START = 20;
-  const ANCHOR_END   = 30;
-  const ANCHOR_MID   = 25;
-  const MID_TOL      = 0.1;      // ±0.1 % exakt genug
+  /* Anchor‑Bereich (Pixel) */
+  const ANCHOR_START = vpW * 0.20;
+  const ANCHOR_END   = vpW * 0.30;
+  const ANCHOR_MID   = vpW * 0.25;
+  const MID_TOL      = 2; // px genauigkeit
 
-  /* --------------------------------------------------------------------- *
-   *   Versatz für Kurven & Punkte                                         *
-   * --------------------------------------------------------------------- */
-  const dragPct = dragOffset * 100;                   // ‑1 … 1 → ‑100 … 100
-  const swayPct = isSnapping ? Math.sin(swayPhase) * 1 : 0; // ±1 % nur während Snap
+  /* Wrapper‑Transforms */
+  const dragPx  = dragOffset * vpW;
+  const pointsT = `translateX(${offsetX + dragPx + swayX}px)`;
+  const curveT  = `translateX(${offsetX * CURVE_TILT + dragPx + swayX}px)`;
 
-  const pointsX = offsetPct + dragPct + swayPct;                  // Punkte 100 %
-  const curveX  = offsetPct * curveTilt + dragPct + swayPct;      // Kurven 20 %
-
-  const pointsStyle = { transform: `translateX(${pointsX}%)` };
-  const curveStyle  = { transform: `translateX(${curveX}%)`   };
-
-  /* --------------------------------------------------------------------- *
-   *   Render                                                              *
-   * --------------------------------------------------------------------- */
+  /* ───────────────────────── JSX‑Render ──────────────────────────────── */
   return (
-    <div className={styles.timeline}>
-      {/* ------------------------ Kurven ------------------------------- */}
+    <div className={styles.timeline} ref={vpRef} style={{ height }}>
+      {/* SVG‑Kurven */}
       <svg
         className={styles.timelineSvg}
-        viewBox={`0 0 ${viewW} ${viewH}`}
+        style={{ width: totalW }}
+        viewBox={`0 0 ${totalW} ${height}`}
         preserveAspectRatio="none"
       >
-        <g style={curveStyle}>
-          <path d={pathA} className={styles.timelineCurve} />
-          <path d={pathB} className={styles.timelineCurve} />
+        <g style={{ transform: curveT }}>
+          <path d={pathA} stroke={curveColors.A} className={styles.timelineCurve} />
+          <path d={pathB} stroke={curveColors.B} className={styles.timelineCurve} />
         </g>
       </svg>
 
-      {/* ------------------------ Punkte ------------------------------- */}
-      <div className={styles.pointsWrapper} style={pointsStyle}>
+      {/* Punkte + Labels */}
+      <div
+        className={styles.pointsWrapper}
+        style={{ width: totalW, transform: pointsT }}
+      >
         {items.map((it, i) => {
-          const basePct = 10 + i * stepPct;
-          const y       = getY(basePct, it.type);
+          /* Track‑Wahl: item.track explizit > typbasiertes Fallback */
+          const track = it.track ?? (it.type === 'history' ? 'A' : 'B');
 
-          /* Anchor‑Status berechnen */
-          const relX     = basePct + offsetPct;
-          const inAnchor = relX >= ANCHOR_START && relX <= ANCHOR_END;
-          const atMid    = Math.abs(relX - ANCHOR_MID) <= MID_TOL;
+          const x = baseX[i];
+          const y = getY(x, track);
+
+          const screenX  = x + offsetX + dragPx + swayX;
+          const inAnchor = screenX >= ANCHOR_START && screenX <= ANCHOR_END;
+          const atMid    = Math.abs(screenX - ANCHOR_MID) <= MID_TOL;
           const active   = i === activeIndex && atMid;
 
+          /* Fade‑Out links */
+          let opacity = 1;
+          if (screenX < FADE_START) {
+            opacity = screenX <= FADE_END
+              ? 0
+              : (screenX - FADE_END) / (FADE_START - FADE_END);
+          }
+
           /* Klassen zusammensetzen */
-          const pointCls = [
+          const pCls = [
             styles.timelinePoint,
-            it.type === 'history' ? styles.trackHistory : styles.trackCase,
+            track === 'A' ? styles.trackHistory : styles.trackCase,
             inAnchor && styles.inAnchor,
             active   && styles.active
           ].filter(Boolean).join(' ');
 
-          const labelCls = [
+          const lblCls = [
             styles.timelineLabel,
             inAnchor && styles.inAnchor,
             active   && styles.active
           ].filter(Boolean).join(' ');
 
+          /* Gemeinsamer Click‑Handler für Punkt + Label */
+          const handleClick = () => {
+            if (i !== activeIndex) onSelect(i);
+          };
+
           return (
-            <div key={i} style={{ position: 'absolute', left: `${basePct}%`, top: 0 }}>
-              {/* --- Punkt ------------------------------------------------- */}
+            <div
+              key={i}
+              style={{ position: 'absolute', left: `${x}px`, top: 0, opacity }}
+            >
+              {/* Punkt */}
               <div
                 role="button"
                 tabIndex={0}
-                onClick={() => i !== activeIndex && onSelect(i)}
-                className={pointCls}
+                aria-label={`Meilenstein ${it.year}`}
+                onClick={handleClick}
+                className={pCls}
                 style={{ top: `${y}px` }}
               />
-              {/* --- Label ------------------------------------------------ */}
-              <div className={labelCls} style={{ top: `${y + 15}px` }}>
-                <span>{it.title}</span><br />
-                <small>{it.year}</small>
+              {/* Label – jetzt ebenfalls interaktiv */}
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={handleClick}
+                className={lblCls}
+                style={{
+                  top: `${y}px`,
+                  left: '16px',
+                  transform: 'translateY(-50%)',
+                  whiteSpace: 'pre-line',   // \n im Title zulassen
+                  cursor: 'pointer'
+                }}
+              >
+                <span className={styles.labelTitle}>{it.title}</span>
+                <br />
+                <small className={styles.labelYear}>{it.year}</small>
               </div>
             </div>
           );
