@@ -3,8 +3,10 @@
   left: 0;
   bottom: 0;
   width: 100%;
-  /* Höhe wird von der JSX‑Prop height gesetzt */
+  width: 120rem;
+height: 67.5rem;
   overflow: hidden;
+  z-index: 1000;
 }
 
 .timelineSvg {
@@ -69,13 +71,13 @@
   transition: color 600ms ease, background 600ms ease;
   white-space: pre-line; 
   cursor: default;
-  width: 210px;
-  padding: 20px;
+  width: 220px;
+  padding: 16px 12px 12px 16px;
 }
 
 .timelineLabel.inAnchor {
   position: absolute;
-  max-width: 260px;
+  max-width: 400px;
   color: var(--accent);
   font-size: 0.8rem;
   line-height: 1.25;
@@ -84,16 +86,16 @@
   transition: color 600ms ease, background 600ms ease;
   white-space: pre-line; 
   cursor: default;
-  width: 210px;
-  padding: 20px;
+  width: 270px;
+  padding: 16px 12px 12px 16px;
+
 }
 
 .timelineLabel.active {
   color: var(--accent);
   background: var(--card-bg-dark);
-  padding: 20px;
+  padding: 16px 12px 12px 16px;
   border-radius: 14px;
-  backdrop-filter: blur(6px);
   cursor: pointer;
 }
 

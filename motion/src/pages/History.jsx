@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Timeline from "../components/Timeline";
 import styles from "../components/scss/History.module.scss";
 
@@ -7,156 +7,127 @@ const timelineItems = [
   {
     year: "1972",
     title: "Gründung des Unternehmens in Neu-Ulm",
-    text: `Die Wirtschaftskanzlei SGP Schneider Geiwitz wurde 1972 in Neu-Ulm gegründet 
-    und bot von Beginn an Wirtschaftsprüfung, Steuer- und Rechtsberatung, Corporate Finance, 
-    Nachlassverwaltung, Restrukturierung und Insolvenzverwaltung an.`,
+    text: `Die Wirtschaftskanzlei SGP Schneider Geiwitz wurde 1972 in Neu-Ulm gegründet und bot von Beginn an Wirtschaftsprüfung, Steuer- und Rechtsberatung, Corporate Finance, Nachlassverwaltung, Restrukturierung und Insolvenzverwaltung an.`,
     img: "/assets/historie-1972.png",
-    //track: "A",
-    type: "history",
   },
   {
     year: "1995",
     title: "Eintritt von Arndt Geiwitz",
-    text: `Der Eintritt von Arndt Geiwitz prägte die zukünftige Ausrichtung und Reputation von SGP 
-    maßgeblich. Seine Mandate wurden öffentlichkeitswirksam und hoben die Expertise der Kanzlei hervor.`,
+    text: `Der Eintritt von Arndt Geiwitz prägte die zukünftige Ausrichtung und Reputation von SGP maßgeblich. Seine Mandate wurden öffentlichkeitswirksam und hoben die Expertise der Kanzlei hervor.`,
     img: "/assets/historie-1995.png",
-    //track: "B",
-    type: "history",
+  },
+    {
+    year: "1995",
+    title: "Öffentlichkeitswirksame Mandate",
+    text: `Durch die Übernahme von prominenten Mandaten wuchs die Bekanntheit der Kanzlei stetig und etablierte SGP als führende Adresse für komplexe wirtschaftliche Herausforderungen.`,
+    img: "historie-1995.png",
   },
   {
     year: "2000",
     title: "Insolvenzverwaltung",
     text: `Ab 2000 erfolgte der Ausbau der Insolvenzverwaltung mit mehreren Großmandaten in der Region.`,
     img: "/assets/historie-2012.png",
-    //track: "A",
-    type: "case",
   },
   {
     year: "2024",
-    title: "Der neue SGP Campus \n in Neu-Ulm",
-    text: `2024 wurde der moderne SGP Campus eröffnet – ein Zent<rum für Beratung, Forschung und Lehre.`,
-    img: "/assets/historie-2012",
-    //track: "B",
-    type: "history",
-  },
-  {
-    year: "2025",
-    title: " neue SGP Campus in Neu-Ulm",
+    title: "Der neue SGP Campus",
     text: `2024 wurde der moderne SGP Campus eröffnet – ein Zentrum für Beratung, Forschung und Lehre.`,
-    img: "/assets/historie-1995.png",
-    //track: "A",
-    type: "case",
-  },
-  {
-    year: "2026",
-    title: "Der  SGP Campus in Neu-Ulm",
-    text: `2024 wurde der moderne SGP Campus eröffnet – ein Zentrum für Beratung, Forschung und Lehre.`,
-    img: "/assets/historie-2012",
-    //track: "B",
-    type: "history",
+    img: "/assets/historie-2012.png",
   },
 ];
 
+
+// Varianten mit reduziertem Scale für schmalere Seitenansicht und ohne Blur
+const imageVariants = {
+  center:         { x: "0%", scale: 1, opacity: 1, zIndex: 4, filter: "blur(0px) brightness(1)" },
+  leftEdge:       { x: "-128%", scale: 0.5, opacity: 1, zIndex: 3, filter: "blur(0px) brightness(0.5)" },
+  rightEdge:      { x: "48%", scale: 0.5, opacity: 1, zIndex: 3, filter: "blur(0px) brightness(0.5)" },
+  farRight:       { x: "70%", scale: 0.4, opacity: 1, zIndex: 2, filter: "blur(0px) brightness(0.35)" },
+  exitLeft:       { x: "-180%", scale: 0.4, opacity: 0, zIndex: 1 },
+  hiddenFarRight: { x: "180%", opacity: 0, scale: 0.4, zIndex: 1 },
+};
+
+const imageTransition = {
+  type: "spring",
+  stiffness: 40,
+  damping: 15,
+  duration: 0.6,
+  delay: 0.2,
+};
+
+const TIMELINE_HEIGHT = 220;
+
 export default function History() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [dragOffset, setDragOffset] = useState(0);
-  const wrapperRef = useRef(null);
-  const startX = useRef(0);
-  const dragging = useRef(false);
+  const activeItem = timelineItems[activeIndex];
 
-  useEffect(() => {
-    setDragOffset(0);
-  }, [activeIndex]);
-
-  const onTouchStart = (e) => {
-    startX.current = e.touches[0].clientX;
-    dragging.current = true;
-  };
-  const onTouchMove = (e) => {
-    if (!dragging.current) return;
-    setDragOffset(e.touches[0].clientX - startX.current);
-  };
-  const onTouchEnd = () => {
-    if (!dragging.current) return;
-    dragging.current = false;
-    const width = wrapperRef.current.clientWidth;
-    const threshold = width * 0.3;
-    if (dragOffset < -threshold && activeIndex < timelineItems.length - 1) {
-      setActiveIndex((i) => i + 1);
-    } else if (dragOffset > threshold && activeIndex > 0) {
-      setActiveIndex((i) => i - 1);
-    } else {
-      setDragOffset(0);
+  const navigateTo = (index) => {
+    if (index >= 0 && index < timelineItems.length) {
+      setActiveIndex(index);
     }
   };
 
   return (
     <div className={styles.historyContainer}>
-      {/* HEADER */}
-      <div className={styles.historyHeader}></div>
+      <div className={styles.contentWrapper}>
+        <div className={styles.textContainer}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0.4, delay: 0.8 } }}
+              exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            >
+              <div className={styles.year}>{activeItem.year}</div>
+              <div className={styles.title}>{activeItem.title}</div>
+              <p className={styles.text}>{activeItem.text}</p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+        <div className={styles.imageStage}>
+          {timelineItems.map((item, idx) => {
+            let variant;
+            const diff = idx - activeIndex;
 
-      {/* PANELS */}
-      <div
-        className={styles.contentWrapper}
-        ref={wrapperRef}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
-        <motion.div
-          className={styles.panels}
-          animate={{
-            x: `calc(-${activeIndex * 100}% + ${dragOffset}px)`,
-          }}
-          transition={{ type: "spring", stiffness: 100, damping: 20 }}
-        >
-          {timelineItems.map((item, idx) => (
-            <div className={styles.panel} key={idx}>
-              <div className={styles.left}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className={styles.year}
-                >
-                  {item.year}
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  className={styles.title}
-                >
-                  {item.title}
-                </motion.div>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
-                  className={styles.text}
-                >
-                  {item.text}
-                </motion.p>
-              </div>
+            switch (diff) {
+                case 0: variant = "center"; break;
+                case -1: variant = "leftEdge"; break;
+                case 1: variant = "rightEdge"; break;
+                case 2: variant = "farRight"; break;
+                default:
+                    if (diff < -1) {
+                        variant = "exitLeft";
+                    } else {
+                        variant = "hiddenFarRight";
+                    }
+                    break;
+            }
+
+            return (
               <motion.div
-                className={styles.right}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1, type: "spring", stiffness: 80 }}
+                key={idx}
+                className={styles.imageContainer}
+                variants={imageVariants}
+                initial="hiddenFarRight"
+                animate={variant}
+                transition={imageTransition}
+                onClick={() => {
+                  if (variant === "leftEdge" || variant === "rightEdge" || variant === "farRight") {
+                    navigateTo(idx);
+                  }
+                }}
               >
-                <img src={item.img} alt={item.title} />
+                <img src={item.img} alt={item.title} className={styles.panelImg} />
               </motion.div>
-            </div>
-          ))}
-        </motion.div>
+            );
+          })}
+        </div>
       </div>
-
-      {/* TIMELINE */}
-      <Timeline
-        items={timelineItems}
-        activeIndex={activeIndex}
-        onSelect={setActiveIndex}
-        dragOffset={dragOffset / (wrapperRef.current?.clientWidth || 1)}
+      <Timeline 
+          items={timelineItems} 
+          activeIndex={activeIndex} 
+          onSelect={navigateTo}
+          height={TIMELINE_HEIGHT}
       />
     </div>
   );

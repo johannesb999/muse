@@ -2,7 +2,7 @@
   //colors
   --bg: #000;
   --card-bg: #111;
-  --card-bg-dark: #e0ff460b;
+  --card-bg-dark: hsla(70, 100%, 64%, 0.081);
   --accent: #E0FF46;
   --text-light: #eee;
   --text-muted: #ccd;
@@ -33,7 +33,8 @@
   font-family: "Helvetica Neue", Arial, sans-serif;
   min-height: 100vh;
   max-width: 100dvw;
-  padding: var(--gap);
+  padding: 10px var(--gap) var(--gap) var(--gap);
+
 }
 
 .header .logo {

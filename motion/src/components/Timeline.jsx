@@ -10,10 +10,10 @@ export default function Timeline({
   activeIndex,
   onSelect,
   dragOffset = 0,               //  −1 … 1  (normalisiert vom übergeordneten Wrapper)
-  height      = 170,            // visuelle Höhe der Timeline (kann > 150 px für 3‑zeilige Labels sein)
+  height      = 20,            // visuelle Höhe der Timeline (kann > 150 px für 3‑zeilige Labels sein)
   curveColors = {               // Standard‑Farben (hellgrau)
-    A: 'rgba(255,255,255,0.25)',
-    B: 'rgba(255,255,255,0.25)'
+    A: '#303233',
+    B: '#484B4D'
   }
 }) {
   /* ───────────────────────── Geometrische Ableitungen ────────────────── */
