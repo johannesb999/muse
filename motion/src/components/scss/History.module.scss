@@ -5,7 +5,7 @@
   height: 100vh;
   background: #000;
   overflow: hidden;
-  font-family: "Inter", sans-serif;
+  font-family: "BeausiteClassic", sans-serif;
   color: #fff;
 }
 
@@ -85,44 +85,4 @@
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.7);
   max-width: 400px;
-}
-
-
-/* Responsive Anpassungen (unverändert) */
-@media (max-width: 900px) {
-  .contentWrapper {
-    flex-direction: column;
-        justify-content: flex-end;
-        height: 100%;
-  }
-
-    .imageStage {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        flex-basis: auto;
-    }
-
-  .textContainer {
-        flex-basis: auto;
-    width: 100%;
-        height: auto;
-        padding: 6rem 1.5rem 2rem 1.5rem;
-    text-align: center;
-        align-items: center;
-    background: linear-gradient(to top, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 0));
-  }
-
-  .panelImg {
-    max-width: 85%;
-    max-height: 50%;
-  }
-
-  .imageContainer {
-    &:not([style*="z-index: 3"]) {
-      display: none;
-    }
-  }
 }

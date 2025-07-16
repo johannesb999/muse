@@ -36,15 +36,48 @@ const timelineItems = [
   },
 ];
 
-
-// Varianten mit reduziertem Scale für schmalere Seitenansicht und ohne Blur
+// Korrigierte Varianten mit viewport-responsive Positionierung
 const imageVariants = {
-  center:         { x: "0%", scale: 1, opacity: 1, zIndex: 4, filter: "blur(0px) brightness(1)" },
-  leftEdge:       { x: "-128%", scale: 0.5, opacity: 1, zIndex: 3, filter: "blur(0px) brightness(0.5)" },
-  rightEdge:      { x: "48%", scale: 0.5, opacity: 1, zIndex: 3, filter: "blur(0px) brightness(0.5)" },
-  farRight:       { x: "70%", scale: 0.4, opacity: 1, zIndex: 2, filter: "blur(0px) brightness(0.35)" },
-  exitLeft:       { x: "-180%", scale: 0.4, opacity: 0, zIndex: 1 },
-  hiddenFarRight: { x: "180%", opacity: 0, scale: 0.4, zIndex: 1 },
+  center: { 
+    x: "0%", 
+    scale: 1, 
+    opacity: 1, 
+    zIndex: 4, 
+    filter: "blur(0px) brightness(1)" 
+  },
+  leftEdge: { 
+    x: "-120%", 
+    scale: 0.5, 
+    opacity: 1, 
+    zIndex: 3, 
+    filter: "blur(0px) brightness(0.5)" 
+  },
+  rightEdge: { 
+    x: "80%", 
+    scale: 0.5, 
+    opacity: 1, 
+    zIndex: 3, 
+    filter: "blur(0px) brightness(0.5)" 
+  },
+  farRight: { 
+    x: "200%", 
+    scale: 0.4, 
+    opacity: 0, 
+    zIndex: 1, 
+    filter: "blur(0px) brightness(0.35)" 
+  },
+  exitLeft: { 
+    x: "-200%", 
+    scale: 0.4, 
+    opacity: 0, 
+    zIndex: 1 
+  },
+  hiddenFarRight: { 
+    x: "200%", 
+    opacity: 0, 
+    scale: 0.4, 
+    zIndex: 1 
+  },
 };
 
 const imageTransition = {

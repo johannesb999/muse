@@ -1,3 +1,5 @@
+@use './components/scss/fonts.scss' as *;
+
 :root {
   //colors
   --bg: #000;
@@ -21,16 +23,19 @@
   padding: 0;
 }
 
-.html, body {
+html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+    font-family: 'BeausiteClassic', Arial, sans-serif;
+
 }
 
 .page {
   background: var(--bg);
   color: var(--text-light);
-  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-family: 'BeausiteClassic', Arial, sans-serif;
+  font-weight: 400;
   min-height: 100vh;
   max-width: 100dvw;
   padding: 10px var(--gap) var(--gap) var(--gap);

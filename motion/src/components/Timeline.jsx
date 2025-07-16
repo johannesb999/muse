@@ -1,5 +1,3 @@
-
-
 import React, {
   useState, useEffect, useRef, useMemo, useCallback
 } from 'react';
@@ -9,13 +7,25 @@ export default function Timeline({
   items,
   activeIndex,
   onSelect,
-  dragOffset = 0,               //  −1 … 1  (normalisiert vom übergeordneten Wrapper)
-  height      = 20,            // visuelle Höhe der Timeline (kann > 150 px für 3‑zeilige Labels sein)
-  curveColors = {               // Standard‑Farben (hellgrau)
+  dragOffset = 0,
+  height = 20,
+  curveColors = {
     A: '#303233',
     B: '#484B4D'
   }
 }) {
+  // Robustness: Validate items
+  const validItems = Array.isArray(items) ? items.filter(Boolean) : [];
+  const itemCount = validItems.length;
+  // If no valid items, render fallback
+  if (itemCount === 0) {
+    return (
+      <div className={styles.timeline} style={{ height }}>
+        <div className={styles.timelineFallback}>Keine Timeline-Daten verfügbar.</div>
+      </div>
+    );
+  }
+
   /* ───────────────────────── Geometrische Ableitungen ────────────────── */
   const AMP        = height * 0.26;  // ≈ 26 % der Gesamt‑Höhe
   const TRACK_GAP  = height * 0.1;  // vertikaler Abstand der beiden Gleise
@@ -38,16 +48,17 @@ export default function Timeline({
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  /* ───────────────────────── Gesamtlänge & Kurven‑Lookup ─────────────── */
-  const LEFT_MARGIN  = vpW * 0.25;                    // = Anchor‑Mitte x‑Pixel
+  // Clamp totalW to at least 1
+  const LEFT_MARGIN = vpW * 0.25;
   const RIGHT_MARGIN = vpW * 0.25;
-  const totalW       = LEFT_MARGIN + RIGHT_MARGIN + (items.length - 1) * SPACING_PX;
+  const rawTotalW = LEFT_MARGIN + RIGHT_MARGIN + (itemCount - 1) * 300;
+  const totalW = Math.max(1, rawTotalW);
 
   const { pathA, pathB, lookupA, lookupB } = useMemo(() => {
-    const k = (2.5 * Math.PI) / totalW;                 // exakt eine Welle auf totalW
+    const k = (2.5 * Math.PI) / totalW;
     const build = (baseY, phase = 0) => {
       let d = '';
-      const lu = new Array(totalW + 1);
+      const lu = new Array(Math.max(1, totalW + 1));
       for (let x = 0; x <= totalW; x++) {
         const y = baseY + AMP * Math.sin(k * x + phase);
         lu[x] = y;
@@ -62,8 +73,8 @@ export default function Timeline({
 
   /* ───────────────────────── X‑Grundkoordinaten aller Punkte ─────────── */
   const baseX = useMemo(
-    () => items.map((_, i) => LEFT_MARGIN + i * SPACING_PX),
-    [items.length, LEFT_MARGIN]
+    () => validItems.map((_, i) => LEFT_MARGIN + i * 300),
+    [itemCount, LEFT_MARGIN]
   );
 
   /* ───────────────────────── Animations‑State ─────────────────────────── */
@@ -155,7 +166,7 @@ export default function Timeline({
         className={styles.pointsWrapper}
         style={{ width: totalW, transform: pointsT }}
       >
-        {items.map((it, i) => {
+        {validItems.map((it, i) => {
           /* Track‑Wahl: item.track explizit > typbasiertes Fallback */
           const track = it.track ?? (it.type === 'history' ? 'A' : 'B');
 
