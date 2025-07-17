@@ -22,7 +22,7 @@ const timelineItems = [
   },
   {
     year: "1995",
-    title: "Öffentlichkeitswirksame Mandate",
+    title: "Öffentlichkeitswirksame \nMandate",
     text: `Durch die Übernahme von prominenten Mandaten wuchs die Bekanntheit der Kanzlei stetig und etablierte SGP als führende Adresse für komplexe wirtschaftliche Herausforderungen.`,
     img: "/assets/historie-1995.png",
     type: "case",
@@ -55,7 +55,7 @@ const imageVariants = {
     zIndex: 4,
     filter: "blur(0px) brightness(1)",
     transition: {
-      scale: { duration: 0.3, delay: 1.3 }, // Vergrößern nach Verschieben
+      scale: { duration: 0.6, delay: 1.3 }, // Vergrößern nach Verschieben
       left: { duration: 0.5, delay: 0.8 }, // Verschieben nach Pause
       x: { duration: 0.5, delay: 0.8 },
       opacity: { duration: 0.3 },
@@ -70,7 +70,7 @@ const imageVariants = {
     zIndex: 3,
     filter: "blur(0px) brightness(0.5)",
     transition: {
-      scale: { duration: 0.3 }, // Verkleinern zuerst
+      scale: { duration: 0.6 }, // Verkleinern zuerst
       left: { duration: 0.5, delay: 0.8 }, // Verschieben nach Pause
       x: { duration: 0.5, delay: 0.8 },
       opacity: { duration: 0.3 },
@@ -85,7 +85,7 @@ const imageVariants = {
     zIndex: 3,
     filter: "blur(0px) brightness(0.5)",
     transition: {
-      scale: { duration: 0.3 }, // Verkleinern zuerst
+      scale: { duration: 0.6 }, // Verkleinern zuerst
       left: { duration: 0.5, delay: 0.8 }, // Verschieben nach Pause
       x: { duration: 0.5, delay: 0.8 },
       opacity: { duration: 0.3 },
@@ -99,10 +99,11 @@ const imageVariants = {
     opacity: 0,
     zIndex: 1,
     transition: {
-      scale: { duration: 0.3 },
-      left: { duration: 0.5, delay: 0.8 },
+      scale: { duration: 0.3 }, // Verkleinern zuerst
+      left: { duration: 0.5, delay: 0.8 }, // Verschieben nach Pause
       x: { duration: 0.5, delay: 0.8 },
       opacity: { duration: 0.3 },
+      filter: { duration: 0.3 },
     },
   },
   hiddenRight: {
@@ -112,10 +113,11 @@ const imageVariants = {
     scale: 0.5,
     zIndex: 1,
     transition: {
-      scale: { duration: 0.3 },
-      left: { duration: 0.5, delay: 0.8 },
+      scale: { duration: 0.3 }, // Verkleinern zuerst
+      left: { duration: 0.5, delay: 0.8 }, // Verschieben nach Pause
       x: { duration: 0.5, delay: 0.8 },
       opacity: { duration: 0.3 },
+      filter: { duration: 0.3 },
     },
   },
   // Zustand für Verkleinerung vor Verschieben
@@ -123,12 +125,6 @@ const imageVariants = {
     scale: 0.5,
     transition: { duration: 0.3 },
   },
-};
-
-const textVariants = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 1.3 } },
-  exit: { opacity: 0, transition: { duration: 0.3 } },
 };
 
 const TIMELINE_HEIGHT = 320;
@@ -202,16 +198,34 @@ export default function History() {
           <AnimatePresence mode="wait">
             <motion.div
               key={activeIndex}
-              variants={textVariants}
               initial="initial"
               animate="animate"
               exit="exit"
             >
-              <motion.div className={styles.year}>{activeItem.year}</motion.div>
-              <motion.div className={styles.title}>
+              <motion.div
+                className={styles.year}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.48, delay: 1.7 }}
+              >
+                {activeItem.year}
+              </motion.div>
+              <motion.div
+                className={styles.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.48, delay: 2.18 }}
+              >
                 {activeItem.title}
               </motion.div>
-              <motion.p className={styles.text}>{activeItem.text}</motion.p>
+              <motion.p
+                className={styles.text}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.32, delay: 2.5 }}
+              >
+                {activeItem.text}
+              </motion.p>
             </motion.div>
           </AnimatePresence>
         </div>
