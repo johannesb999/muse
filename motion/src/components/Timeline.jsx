@@ -18,33 +18,87 @@ export default function Timeline({
     B: "#484B4D",
   },
 }) {
-  // Robustness: Validate items
-  const validItems = Array.isArray(items) ? items.filter(Boolean) : [];
+  // Robustness: Validate items - ALL HOOKS MUST BE BEFORE ANY EARLY RETURNS
+  const validItems = useMemo(
+    () => (Array.isArray(items) ? items.filter(Boolean) : []),
+    [items]
+  );
   const itemCount = validItems.length;
-  // If no valid items, render fallback
-  if (itemCount === 0) {
-    return (
-      <div className={styles.timeline} style={{ height }}>
-        <div className={styles.timelineFallback}>
-          Keine Timeline-Daten verfügbar.
-        </div>
-      </div>
-    );
-  }
 
-  /* ───────────────────────── Geometrische Ableitungen ────────────────── */
-  const AMP = height * 0.17; // ≈ 26 % der Gesamt‑Höhe
+  /* Geometrische Ableitungen */
+  const AMP = height * 0.17; // ca. 26% der Gesamt-Hoehe
   const TRACK_GAP = height * 0.04; // vertikaler Abstand der beiden Gleise
   const baseY_A = height / 2 - TRACK_GAP;
   const baseY_B = height / 2 + TRACK_GAP;
 
-  const SPACING_PX = 390; // Abstand Punkt ↔ Punkt
-  const CURVE_TILT = 0.7; // Kurve kippt 20 % der Punktbewegung mit
-  const SWAY_MAX = 5; // maximale Sway‑Amplitude (px)
-  const FADE_START = 300; // 40 px vor VP‑Rand beginnt Fade‑Out
-  const FADE_END = -60; // 60 px ausserhalb ist 0 Opacity
+  // Helper function to truncate title to 2 lines, 30 chars each
+  const truncateTitle = useCallback((title) => {
+    if (!title) return "";
+    const words = title.split(" ");
+    const lines = [];
+    let currentLine = "";
 
-  /* ───────────────────────── Viewport‑Breite ermitteln ────────────────── */
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      if (testLine.length <= 30) {
+        currentLine = testLine;
+      } else {
+        if (currentLine) {
+          lines.push(currentLine);
+          currentLine = word.length <= 30 ? word : word.substring(0, 30);
+        } else {
+          lines.push(word.substring(0, 30));
+        }
+        if (lines.length >= 2) break;
+      }
+    }
+    if (currentLine && lines.length < 2) {
+      lines.push(currentLine);
+    }
+    return lines.slice(0, 2).join("\n");
+  }, []);
+
+  // Helper function to calculate label width (Schätzung basierend auf Text)
+  const calculateLabelWidth = useCallback(
+    (title, year) => {
+      if (!title || !year) return 200; // Fallback
+
+      // Präzisere Breitenberechnung
+      const truncatedTitle = truncateTitle(title);
+      const lines = truncatedTitle.split("\n");
+
+      // Schätze Breite pro Zeile (verschiedene Zeichen haben unterschiedliche Breiten)
+      const estimateLineWidth = (line) => {
+        // Durchschnittlich: Großbuchstaben ~14px, Kleinbuchstaben ~10px, Leerzeichen ~5px
+        let width = 0;
+        for (const char of line) {
+          if (char === " ") width += 5;
+          else if (char >= "A" && char <= "Z") width += 14;
+          else if (char >= "a" && char <= "z") width += 10;
+          else width += 12; // Zahlen, Sonderzeichen
+        }
+        return width;
+      };
+
+      const maxLineWidth = Math.max(...lines.map(estimateLineWidth));
+      const yearWidth = year.toString().length * 14; // Jahr ist meist in größerer Schrift
+
+      // Finale Breite: größte Zeile + Padding (32px)
+      const estimatedWidth = Math.max(maxLineWidth, yearWidth) + 40;
+
+      // Min 150px, Max 450px
+      return Math.max(150, Math.min(estimatedWidth, 450));
+    },
+    [truncateTitle]
+  );
+
+  const MIN_SPACING_PX = 150; // Mindestabstand zwischen Label-Ende und nächstem Punkt
+  const CURVE_TILT = 0.7; // Kurve kippt 20% der Punktbewegung mit
+  const SWAY_MAX = 5; // maximale Sway-Amplitude (px)
+  const FADE_START = 300; // 40 px vor VP-Rand beginnt Fade-Out
+  const FADE_END = -60; // 60 px ausserhalb ist 0 Opacity
+
+  /* Viewport-Breite ermitteln */
   const vpRef = useRef(null);
   const [vpW, setVpW] = useState(window.innerWidth);
   useEffect(() => {
@@ -58,15 +112,70 @@ export default function Timeline({
   // Clamp totalW to at least 1
   const LEFT_MARGIN = vpW * 0.25;
   const RIGHT_MARGIN = vpW * 0.25;
-  const rawTotalW = LEFT_MARGIN + RIGHT_MARGIN + (itemCount - 1) * 300;
-  const totalW = Math.max(1, rawTotalW);
+
+  /* X-Grundkoordinaten aller Punkte - basierend auf dynamischen Label-Breiten */
+  const { baseX, totalW } = useMemo(() => {
+    if (itemCount === 0) return { baseX: [], totalW: 1 };
+
+    const positions = [LEFT_MARGIN]; // Erster Punkt
+
+    for (let i = 1; i < itemCount; i++) {
+      const prevItem = validItems[i - 1];
+      const prevLabelWidth = calculateLabelWidth(prevItem.title, prevItem.year);
+      const prevX = positions[i - 1];
+
+      // Nächste Position = vorherige Position + Label-Breite + Mindestabstand
+      const nextX = prevX + prevLabelWidth + MIN_SPACING_PX;
+      positions.push(nextX);
+    }
+
+    const totalWidth = Math.max(
+      1,
+      positions[positions.length - 1] + RIGHT_MARGIN
+    );
+
+    // Zusätzliche Validierung: begrenze totalWidth auf ein sinnvolles Maximum
+    const maxTotalWidth = 50000; // 50.000px als sinnvolle Obergrenze
+    const safeTotalWidth = Math.min(totalWidth, maxTotalWidth);
+
+    return { baseX: positions, totalW: safeTotalWidth };
+  }, [
+    validItems,
+    LEFT_MARGIN,
+    RIGHT_MARGIN,
+    calculateLabelWidth,
+    MIN_SPACING_PX,
+    itemCount,
+  ]);
 
   const { pathA, pathB, lookupA, lookupB } = useMemo(() => {
-    const k = (4.5 * Math.PI) / totalW;
+    // Debug: Prüfe totalW Werte
+    console.log("Building paths with totalW:", totalW, "type:", typeof totalW);
+
+    // Verwende totalW aus dem baseX useMemo
+    let validTotalW = Math.max(1, totalW || 1); // Fallback falls totalW undefined
+
+    // Zusätzliche Validierung
+    if (!Number.isFinite(validTotalW) || validTotalW < 0) {
+      console.error("Invalid totalW:", validTotalW, "using fallback 1000");
+      validTotalW = 1000;
+    }
+
+    console.log("Using validTotalW:", validTotalW);
+
+    const k = (4.5 * Math.PI) / validTotalW;
     const build = (baseY, phase = 0) => {
       let d = "";
-      const lu = new Array(Math.max(1, totalW + 1));
-      for (let x = 0; x <= totalW; x++) {
+      let arraySize = Math.max(1, Math.floor(validTotalW) + 1);
+      console.log("Creating lookup array with size:", arraySize);
+
+      if (arraySize > 100000) {
+        console.error("Array size too large:", arraySize, "capping at 10000");
+        arraySize = 10000;
+      }
+
+      const lu = new Array(arraySize);
+      for (let x = 0; x <= Math.min(validTotalW, arraySize - 1); x++) {
         const y = baseY + AMP * Math.sin(k * x + phase);
         lu[x] = y;
         d += x ? ` L${x},${y}` : `M${x},${y}`;
@@ -78,26 +187,20 @@ export default function Timeline({
     return { pathA: a.d, pathB: b.d, lookupA: a.lu, lookupB: b.lu };
   }, [totalW, AMP, baseY_A, baseY_B]);
 
-  /* ───────────────────────── X‑Grundkoordinaten aller Punkte ─────────── */
-  const baseX = useMemo(
-    () => validItems.map((_, i) => LEFT_MARGIN + i * 300),
-    [itemCount, LEFT_MARGIN]
-  );
-
-  /* ───────────────────────── Animations‑State ─────────────────────────── */
+  /* Animations-State */
   const [offsetX, setOffsetX] = useState(totalW); // Intro: ganz rechts
   const [isSnapping, setIsSnapping] = useState(true);
   const [swayPhase, setSwayPhase] = useState(0);
-  const [snapProg, setSnapProg] = useState(0); // 0 … 1
+  const [snapProg, setSnapProg] = useState(0); // 0 bis 1
   const rafSnap = useRef(null);
   const rafSway = useRef(null);
   const easeOut = (t) => 1 - (1 - t) ** 3;
 
-  /* Snap‑/Intro‑Animation */
+  /* Snap-/Intro-Animation */
   useEffect(() => {
     const start = performance.now();
     const from = offsetX;
-    const targetX = LEFT_MARGIN - baseX[activeIndex]; // Punkt zur Anker‑Mitte
+    const targetX = LEFT_MARGIN - baseX[activeIndex]; // Punkt zur Anker-Mitte
 
     setIsSnapping(true);
 
@@ -120,11 +223,11 @@ export default function Timeline({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex, baseX, LEFT_MARGIN]);
 
-  /* Sway (nur während Snap) */
+  /* Sway (nur waehrend Snap) */
   useEffect(() => {
     if (!isSnapping) return;
     const loop = () => {
-      setSwayPhase((p) => p + 0.018); // ~1,75 s pro Sinus
+      setSwayPhase((p) => p + 0.018); // ca. 1,75 s pro Sinus
       rafSway.current = requestAnimationFrame(loop);
     };
     rafSway.current = requestAnimationFrame(loop);
@@ -135,7 +238,7 @@ export default function Timeline({
     ? Math.sin(swayPhase) * SWAY_MAX * (1 - snapProg)
     : 0;
 
-  /* Y‑Lookup */
+  /* Y-Lookup */
   const getY = useCallback(
     (x, track) => {
       const relX = x + offsetX * (1 - CURVE_TILT);
@@ -145,21 +248,32 @@ export default function Timeline({
     [offsetX, lookupA, lookupB, totalW]
   );
 
-  /* Anchor‑Bereich (Pixel) */
+  // If no valid items, render fallback - NOW AFTER ALL HOOKS
+  if (itemCount === 0) {
+    return (
+      <div className={styles.timeline} style={{ height }}>
+        <div className={styles.timelineFallback}>
+          Keine Timeline-Daten verfügbar.
+        </div>
+      </div>
+    );
+  }
+
+  /* Anchor-Bereich (Pixel) */
   const ANCHOR_START = vpW * 0.2;
   const ANCHOR_END = vpW * 0.3;
   const ANCHOR_MID = vpW * 0.25;
   const MID_TOL = 2;
 
-  /* Wrapper‑Transforms */
+  /* Wrapper-Transforms */
   const dragPx = dragOffset * vpW;
   const pointsT = `translateX(${offsetX + dragPx + swayX}px)`;
   const curveT = `translateX(${offsetX * CURVE_TILT + dragPx + swayX}px)`;
 
-  /* ───────────────────────── JSX‑Render ──────────────────────────────── */
+  /* JSX-Render */
   return (
     <div className={styles.timeline} ref={vpRef} style={{ height }}>
-      {/* SVG‑Kurven */}
+      {/* SVG-Kurven */}
       <svg
         className={styles.timelineSvg}
         style={{ width: totalW }}
@@ -186,7 +300,7 @@ export default function Timeline({
         style={{ width: totalW, transform: pointsT }}
       >
         {validItems.map((it, i) => {
-          /* Track‑Wahl: item.track explizit > typbasiertes Fallback */
+          /* Track-Wahl: item.track explizit > typbasiertes Fallback */
           const track = it.track ?? (it.type === "history" ? "A" : "B");
 
           const x = baseX[i];
@@ -197,7 +311,7 @@ export default function Timeline({
           const atMid = Math.abs(screenX - ANCHOR_MID) <= MID_TOL;
           const active = i === activeIndex && atMid;
 
-          /* Fade‑Out links */
+          /* Fade-Out links */
           let opacity = 1;
           if (screenX < FADE_START) {
             opacity =
@@ -224,10 +338,14 @@ export default function Timeline({
             .filter(Boolean)
             .join(" ");
 
-          /* Gemeinsamer Click‑Handler für Punkt + Label */
+          /* Gemeinsamer Click-Handler für Punkt + Label */
           const handleClick = () => {
             if (i !== activeIndex) onSelect(i);
           };
+
+          // Truncate title to 2 lines, 30 chars each
+          const truncatedTitle = truncateTitle(it.title);
+          const labelWidth = calculateLabelWidth(it.title, it.year);
 
           return (
             <div
@@ -243,7 +361,7 @@ export default function Timeline({
                 className={pCls}
                 style={{ top: `${y}px` }}
               />
-              {/* Label – jetzt ebenfalls interaktiv */}
+              {/* Label - jetzt ebenfalls interaktiv */}
               <div
                 role="button"
                 tabIndex={0}
@@ -255,11 +373,11 @@ export default function Timeline({
                   transform: "translateY(-50%)",
                   whiteSpace: "pre-line", // \n im Title zulassen
                   cursor: "pointer",
+                  width: `${labelWidth}px`, // Dynamische Breite
                 }}
               >
-                <span className={styles.labelTitle}>{it.title}</span>
-                <br />
-                <small className={styles.labelYear}>{it.year}</small>
+                <div className={styles.labelTitle}>{truncatedTitle}</div>
+                <div className={styles.labelYear}>{it.year}</div>
               </div>
             </div>
           );

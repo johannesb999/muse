@@ -72,8 +72,8 @@
   transition: color 600ms ease, background 600ms ease;
   white-space: pre-line;
   cursor: default;
-  width: 400px;
   padding: 16px 12px 12px 16px;
+  /* Entferne feste Breite - wird jetzt dynamisch gesetzt */
 }
 
 .timelineLabel.inAnchor {
@@ -86,8 +86,8 @@
   transition: color 600ms ease, background 600ms ease;
   white-space: pre-line;
   cursor: default;
-  width: 400px;
   padding: 16px 12px 12px 16px;
+  /* Entferne feste Breite - wird jetzt dynamisch gesetzt */
 }
 
 .timelineLabel.active {
@@ -101,11 +101,21 @@
 .labelTitle {
   font-weight: 400;
   font-size: 1.75rem;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  /* JavaScript truncateTitle begrenzt bereits auf 2 Zeilen */
+  word-wrap: break-word;
+  /* Lange Wörter umbrechen */
+  /* max-height als Sicherheit */
+  max-height: calc(1.3em * 2);
+  /* 2 Zeilen * line-height */
+  overflow: hidden;
 }
 
 .labelYear {
   font-size: 1.75rem;
   color: var(--text-muted);
+  margin-top: 8px;
 }
 
 /* Tastatur‑Fokus für Barrierefreiheit */
@@ -113,4 +123,15 @@
 .timelineLabel:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
+}
+
+/* Fallback für leere Timeline */
+.timelineFallback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  text-align: center;
 }

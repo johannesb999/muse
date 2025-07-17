@@ -18,7 +18,6 @@
   align-items: center;
 }
 
-/* KORRIGIERT: Textbereich schmaler */
 .textContainer {
   flex-basis: 35%;
   height: 100%;
@@ -31,7 +30,6 @@
   z-index: 10;
 }
 
-/* KORRIGIERT: Bildbereich schmaler, um Abstand zu schaffen */
 .imageStage {
   flex-basis: 55%;
   height: 100%;
@@ -55,7 +53,6 @@
   cursor: pointer;
 }
 
-/* KORRIGIERT: Bild selbst etwas kleiner */
 .panelImg {
   width: auto;
   max-width: 70%;
@@ -63,11 +60,7 @@
   max-height: 70%;
   object-fit: cover;
   border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
 }
-
-
-
 
 .year {
   font-size: 11.25rem;

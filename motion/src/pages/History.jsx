@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Timeline from "../components/Timeline";
 import styles from "../components/scss/History.module.scss";
-import { track } from "motion/react-client";
 
+// use \n to break line
 const timelineItems = [
   {
     year: "1972",
