@@ -49,7 +49,7 @@ const timelineItems = [
 const imageVariants = {
   center: {
     left: "30%", // Bild A zentriert, Text wird rechts davon positioniert
-    x: "-50%",
+    x: "-45%",
     scale: 1, // Startet klein
     opacity: 1,
     zIndex: 4,
@@ -64,7 +64,7 @@ const imageVariants = {
   },
   leftEdge: {
     left: "0%",
-    x: "-50%", // Teilweise abgeschnitten
+    x: "-55%", // Teilweise abgeschnitten
     scale: 0.5,
     opacity: 1,
     zIndex: 3,
@@ -79,7 +79,7 @@ const imageVariants = {
   },
   rightEdge: {
     left: "100%",
-    x: "-50%", // Teilweise abgeschnitten
+    x: "-45%", // Teilweise abgeschnitten
     scale: 0.5,
     opacity: 1,
     zIndex: 3,
