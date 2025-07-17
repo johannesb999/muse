@@ -1,11 +1,11 @@
-@use './components/scss/fonts.scss' as *;
+@use "./components/scss/fonts.scss" as *;
 
 :root {
   //colors
   --bg: #000;
   --card-bg: #111;
   --card-bg-dark: hsla(70, 100%, 64%, 0.081);
-  --accent: #E0FF46;
+  --accent: #e0ff46;
   --text-light: #eee;
   --text-muted: #ccd;
 
@@ -13,7 +13,7 @@
 
   --radius: 24px;
   --gap: 3rem;
- 
+
   //text-styles
 }
 
@@ -23,27 +23,23 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-    font-family: 'BeausiteClassic', Arial, sans-serif;
-
+  font-family: "BeausiteClassic", sans-serif;
 }
 
 .page {
   background: var(--bg);
   color: var(--text-light);
-  font-family: 'BeausiteClassic', Arial, sans-serif;
+  font-family: "BeausiteClassic", sans-serif;
   font-weight: 400;
   min-height: 100vh;
   max-width: 100dvw;
-  padding: 10px var(--gap) var(--gap) var(--gap);
-
 }
 
 .header .logo {
-height: 2rem;
+  height: 2rem;
 }
-
-

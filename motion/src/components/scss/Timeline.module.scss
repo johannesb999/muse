@@ -22,7 +22,7 @@
   height: 100%;
 
   /* jedes Wrapper‑div eines Punkts (für Fade‑Out) */
-  > div {
+  >div {
     transition: opacity 300ms ease;
   }
 }
@@ -48,6 +48,7 @@
 .trackHistory {
   box-shadow: 0 0 0 2px var(--text-light);
 }
+
 .trackCase {
   box-shadow: 0 0 0 2px var(--text-light);
 }
@@ -55,6 +56,7 @@
 .timelinePoint.inAnchor {
   background: #cffe5f;
 }
+
 .timelinePoint.active {
   background: var(--accent);
   box-shadow: 0 0 0 6px rgba(224, 255, 70, 0.18);
@@ -63,31 +65,28 @@
 /* ───────── Labels ───────── */
 .timelineLabel {
   position: absolute;
-  max-width: 260px;
   color: var(--text-light);
-  font-size: 0.8rem;
   line-height: 1.25;
-  pointer-events: auto; /* klickbar */
+  pointer-events: auto;
   user-select: none;
   transition: color 600ms ease, background 600ms ease;
   white-space: pre-line;
   cursor: default;
-  width: 220px;
+  width: 400px;
   padding: 16px 12px 12px 16px;
 }
 
 .timelineLabel.inAnchor {
   position: absolute;
-  max-width: 400px;
   color: var(--accent);
   font-size: 0.8rem;
   line-height: 1.25;
-  pointer-events: auto; /* klickbar */
+  pointer-events: auto;
   user-select: none;
   transition: color 600ms ease, background 600ms ease;
   white-space: pre-line;
   cursor: default;
-  width: 270px;
+  width: 400px;
   padding: 16px 12px 12px 16px;
 }
 
@@ -100,11 +99,12 @@
 }
 
 .labelTitle {
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 400;
+  font-size: 1.75rem;
 }
+
 .labelYear {
-  font-size: 0.75rem;
+  font-size: 1.75rem;
   color: var(--text-muted);
 }
 
