@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Timeline from "../components/Timeline";
 import styles from "../components/scss/History.module.scss";
 
-// use \n to break line
 const timelineItems = [
   {
     year: "1972",
@@ -49,38 +48,87 @@ const timelineItems = [
 
 const imageVariants = {
   center: {
-    x: "0%",
-    scale: 1.15,
+    left: "30%", // Bild A zentriert, Text wird rechts davon positioniert
+    x: "-50%",
+    scale: 1, // Startet klein
     opacity: 1,
     zIndex: 4,
     filter: "blur(0px) brightness(1)",
+    transition: {
+      scale: { duration: 0.3, delay: 1.3 }, // Vergrößern nach Verschieben
+      left: { duration: 0.5, delay: 0.8 }, // Verschieben nach Pause
+      x: { duration: 0.5, delay: 0.8 },
+      opacity: { duration: 0.3 },
+      filter: { duration: 0.3 },
+    },
   },
   leftEdge: {
-    x: "-130%",
+    left: "0%",
+    x: "-50%", // Teilweise abgeschnitten
     scale: 0.5,
     opacity: 1,
     zIndex: 3,
     filter: "blur(0px) brightness(0.5)",
+    transition: {
+      scale: { duration: 0.3 }, // Verkleinern zuerst
+      left: { duration: 0.5, delay: 0.8 }, // Verschieben nach Pause
+      x: { duration: 0.5, delay: 0.8 },
+      opacity: { duration: 0.3 },
+      filter: { duration: 0.3 },
+    },
   },
   rightEdge: {
-    x: "80%",
+    left: "100%",
+    x: "-50%", // Teilweise abgeschnitten
     scale: 0.5,
     opacity: 1,
     zIndex: 3,
     filter: "blur(0px) brightness(0.5)",
+    transition: {
+      scale: { duration: 0.3 }, // Verkleinern zuerst
+      left: { duration: 0.5, delay: 0.8 }, // Verschieben nach Pause
+      x: { duration: 0.5, delay: 0.8 },
+      opacity: { duration: 0.3 },
+      filter: { duration: 0.3 },
+    },
   },
   exitLeft: {
-    x: "-200%",
+    left: "-50%",
+    x: "-50%",
     scale: 0.5,
     opacity: 0,
     zIndex: 1,
+    transition: {
+      scale: { duration: 0.3 },
+      left: { duration: 0.5, delay: 0.8 },
+      x: { duration: 0.5, delay: 0.8 },
+      opacity: { duration: 0.3 },
+    },
   },
   hiddenRight: {
-    x: "200%",
+    left: "150%",
+    x: "-50%",
     opacity: 0,
-    scale: 0.4,
+    scale: 0.5,
     zIndex: 1,
+    transition: {
+      scale: { duration: 0.3 },
+      left: { duration: 0.5, delay: 0.8 },
+      x: { duration: 0.5, delay: 0.8 },
+      opacity: { duration: 0.3 },
+    },
   },
+  // Zustand für Verkleinerung vor Verschieben
+  shrink: {
+    scale: 0.5,
+    transition: { duration: 0.3 },
+  },
+};
+
+const textVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 1.3 } },
+  exit: { opacity: 0, transition: { duration: 0.3 } },
 };
 
 const TIMELINE_HEIGHT = 320;
@@ -98,40 +146,6 @@ export default function History() {
   return (
     <div className={styles.historyContainer}>
       <div className={styles.contentWrapper}>
-        <div className={styles.textContainer}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeIndex}
-              exit={{ opacity: 0, transition: { duration: 0.5 } }}
-            >
-              <motion.div
-                className={styles.year}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.0, duration: 0.7 }}
-              >
-                {activeItem.year}
-              </motion.div>
-              <motion.div
-                className={styles.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.7, duration: 0.7 }}
-              >
-                {activeItem.title}
-              </motion.div>
-              <motion.p
-                className={styles.text}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 2.3, duration: 0.7 }}
-              >
-                {activeItem.text}
-              </motion.p>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
         <div className={styles.imageStage}>
           {timelineItems.map((item, idx) => {
             let variant;
@@ -149,37 +163,25 @@ export default function History() {
               variant = "hiddenRight";
             }
 
+            // Verkleinerung vor Verschieben nur für das aktuelle zentrale Bild
+            const initialVariant = diff === 0 ? "shrink" : "hiddenRight";
+
+            const imgClass =
+              variant === "center"
+                ? styles.centerImg
+                : variant === "leftEdge"
+                ? styles.leftImg
+                : variant === "rightEdge"
+                ? styles.rightImg
+                : "";
+
             return (
               <motion.div
                 key={idx}
-                className={styles.imageContainer}
+                className={`${styles.imageContainer} ${imgClass}`}
                 variants={imageVariants}
-                initial="hiddenRight"
+                initial={initialVariant}
                 animate={variant}
-                transition={{
-                  scale: {
-                    type: "spring",
-                    stiffness: 60,
-                    damping: 20,
-                    duration: 0.4,
-                    delay: 0.3,
-                  },
-                  x: {
-                    type: "spring",
-                    stiffness: 40,
-                    damping: 15,
-                    duration: 0.5,
-                    delay: 0.7,
-                  },
-                  opacity: {
-                    duration: 0.3,
-                    delay: 0.3,
-                  },
-                  filter: {
-                    duration: 0.3,
-                    delay: 0.7,
-                  },
-                }}
                 onClick={() => {
                   if (variant === "leftEdge" || variant === "rightEdge") {
                     navigateTo(idx);
@@ -194,6 +196,24 @@ export default function History() {
               </motion.div>
             );
           })}
+        </div>
+
+        <div className={styles.textContainer}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeIndex}
+              variants={textVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <motion.div className={styles.year}>{activeItem.year}</motion.div>
+              <motion.div className={styles.title}>
+                {activeItem.title}
+              </motion.div>
+              <motion.p className={styles.text}>{activeItem.text}</motion.p>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
 

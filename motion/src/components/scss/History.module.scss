@@ -1,4 +1,3 @@
-/* Übergeordneter Full‑Screen‑Container */
 .historyContainer {
   position: relative;
   width: 100%;
@@ -9,37 +8,35 @@
 }
 
 .contentWrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
   width: 100%;
   height: calc(100% - 220px);
-  display: flex;
-  align-items: center;
 }
 
 .textContainer {
-  flex-basis: 35%;
+  position: absolute;
+  left: calc(30% + 25% + 80px);
+  /* Rechts vom zentralen Bild (30% + 50% Bildbreite + 80px Abstand) */
+  width: 30%;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-left: clamp(2rem, 8vw, 9rem);
-  padding-right: 2rem;
-  pointer-events: none;
+  padding: 0;
   z-index: 10;
 }
 
 .imageStage {
-  flex-basis: 55%;
+  position: absolute;
+  left: 0;
+  width: 100%;
   height: 100%;
-  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Container für jedes absolut positionierte Bild */
 .imageContainer {
   position: absolute;
   top: 0;
@@ -50,7 +47,7 @@
   align-items: center;
   justify-content: center;
   will-change: transform, opacity, filter;
-  cursor: pointer;
+  padding-right: 80px;
 }
 
 .panelImg {
@@ -58,8 +55,21 @@
   max-width: 70%;
   height: auto;
   max-height: 70%;
-  object-fit: cover;
+  object-fit: fill;
   border-radius: 16px;
+}
+
+.centerImg {
+  /* Zusätzliche Stile für zentrales Bild, falls gewünscht */
+
+}
+
+.leftImg {
+  /* Zusätzliche Stile für linkes Bild */
+}
+
+.rightImg {
+  /* Zusätzliche Stile für rechtes Bild */
 }
 
 .year {
@@ -67,7 +77,6 @@
   font-weight: 300;
   margin-bottom: 1rem;
   font-family: 'BeausiteFit';
-
 }
 
 .title {
