@@ -135,3 +135,44 @@
   font-size: 1.2rem;
   text-align: center;
 }
+
+/* Reset Button */
+.resetButtonContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.resetButton {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 300ms ease;
+  color: #000;
+}
+
+.resetButton:hover {
+  transform: scale(1.1);
+}
+
+.resetIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.resetLabel {
+  color: var(--accent);
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-family: "BeausiteClassic", sans-serif;
+  cursor: pointer;
+  transition: color 300ms ease;
+  user-select: none;
+  white-space: nowrap;
+}

@@ -34,6 +34,13 @@ export default function Timeline({
   // Helper function to truncate title to 2 lines, 30 chars each
   const truncateTitle = useCallback((title) => {
     if (!title) return "";
+
+    // Wenn der gesamte Text unter 30 Zeichen hat, bleibt er einzeilig
+    if (title.length <= 30) {
+      return title;
+    }
+
+    // Nur bei längerem Text: Wort-basierte Aufteilung auf max. 2 Zeilen
     const words = title.split(" ");
     const lines = [];
     let currentLine = "";
@@ -52,10 +59,14 @@ export default function Timeline({
         if (lines.length >= 2) break;
       }
     }
+    
+    // Füge die letzte Zeile hinzu, falls vorhanden und Platz da ist
     if (currentLine && lines.length < 2) {
       lines.push(currentLine);
     }
-    return lines.slice(0, 2).join("\n");
+    
+    // Verbinde mit \n nur wenn wirklich mehrere Zeilen vorhanden sind
+    return lines.length > 1 ? lines.join("\n") : lines[0] || "";
   }, []);
 
   // Helper function to calculate label width (Schätzung basierend auf Text)
@@ -383,6 +394,59 @@ export default function Timeline({
           );
         })}
       </div>
+
+      {/* Reset Button außerhalb des scrollbaren Bereichs */}
+      {(() => {
+        // Prüfe ob der letzte Punkt im Anchor-Bereich ist
+        const lastIndex = validItems.length - 1;
+        if (lastIndex < 0) return null;
+
+        const lastX = baseX[lastIndex];
+        const lastScreenX = lastX + offsetX + dragPx + swayX;
+        const lastPointInAnchor =
+          lastScreenX >= ANCHOR_START && lastScreenX <= ANCHOR_END;
+
+        if (!lastPointInAnchor) return null;
+
+        return (
+          <div
+            className={styles.resetButtonContainer}
+            style={{
+              position: "absolute",
+              right: "70px", // Rechts vom Timeline-Container
+              top: `${height / 2}px`,
+              transform: "translateY(-50%)",
+              opacity: 1,
+              zIndex: 1001,
+            }}
+          >
+            <div className={styles.resetLabel} onClick={() => onSelect(0)}>
+              Zum Anfang
+            </div>
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="Zurück zum Anfang"
+              onClick={() => onSelect(0)}
+              className={styles.resetButton}
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                className={styles.resetIcon}
+              >
+                <path
+                  d="M16 12L8 7v10l8-5z"
+                  fill="currentColor"
+                  transform="rotate(180 12 12)"
+                />
+              </svg>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
