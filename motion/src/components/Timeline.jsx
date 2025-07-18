@@ -281,6 +281,10 @@ export default function Timeline({
   const pointsT = `translateX(${offsetX + dragPx + swayX}px)`;
   const curveT = `translateX(${offsetX * CURVE_TILT + dragPx + swayX}px)`;
 
+  // Calculate position of the last point for fade gradient
+  const lastPointX = validItems.length > 0 ? baseX[validItems.length - 1] : 0;
+  const fadeStartX = lastPointX + 100; // Start fade 100px after last point
+
   /* JSX render */
   return (
     <div className={styles.timeline} ref={vpRef} style={{ height }}>
@@ -291,6 +295,12 @@ export default function Timeline({
         viewBox={`0 0 ${totalW} ${height}`}
         preserveAspectRatio="none"
       >
+        <defs>
+          <linearGradient id="fadeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="var(--bg)" stopOpacity="0" />
+            <stop offset="100%" stopColor="var(--bg)" stopOpacity="1" />
+          </linearGradient>
+        </defs>
         <g style={{ transform: curveT }}>
           <path
             d={pathA}
@@ -303,6 +313,17 @@ export default function Timeline({
             className={styles.timelineCurve}
           />
         </g>
+        {/* Fade overlay starting after last point */}
+        {fadeStartX < totalW && (
+          <rect
+            x={fadeStartX}
+            y="0"
+            width={totalW - fadeStartX}
+            height={height}
+            fill="url(#fadeGradient)"
+            style={{ transform: curveT }}
+          />
+        )}
       </svg>
 
       {/* Points + Labels */}
