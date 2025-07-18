@@ -2,9 +2,9 @@
   position: relative;
   width: 100%;
   height: 100vh;
-  background: #000;
+  background: var(--bg);
   overflow: hidden;
-  color: #fff;
+  color: var(--text-white);
 }
 
 .contentWrapper {
@@ -22,7 +22,7 @@
   flex-direction: column;
   justify-content: center;
   padding: 0;
-  z-index: 10;
+  z-index: var(--z-text-overlay);
 }
 
 .imageStage {
@@ -55,28 +55,28 @@
   height: auto;
   max-height: 70%;
   object-fit: fill;
-  border-radius: 16px;
+  border-radius: var(--spacing-md);
 }
 
 .year {
-  font-size: 11.25rem;
+  font-size: var(--font-size-4xl);
   font-weight: 300;
   margin-bottom: 1rem;
-  font-family: 'BeausiteFit';
+  font-family: var(--font-secondary);
 }
 
 .title {
-  font-size: 3rem;
+  font-size: var(--font-size-3xl);
   font-weight: 100;
-  line-height: 1.3;
+  line-height: var(--line-height-normal);
   margin-bottom: 1.5rem;
   max-width: 450px;
-  font-family: 'BeausiteFit';
+  font-family: var(--font-secondary);
 }
 
 .text {
-  font-size: 1.25rem;
-  line-height: 1.6;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-relaxed);
   color: rgba(255, 255, 255, 0.7);
   max-width: 450px;
 }

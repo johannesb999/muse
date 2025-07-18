@@ -14,7 +14,7 @@ export default function Cards({ cards, order, active, setActive }) {
     setLeaving(true);
     setTimeout(() => {
       navigate(`/${order[idx]}`);
-    }, 1200); // Dauer der Animation
+    }, 1200); // Animation duration
   };
 
   return (
@@ -34,9 +34,10 @@ export default function Cards({ cards, order, active, setActive }) {
             modifier={"expertise"}
             active={active === 0}
           >
+            {" "}
             {active === 0 && (
               <Cta>
-                Mehr erfahren <span aria-hidden="true">→</span>
+                Learn more <span aria-hidden="true">→</span>
               </Cta>
             )}
           </Card>
@@ -51,7 +52,7 @@ export default function Cards({ cards, order, active, setActive }) {
             >
               {active === 1 && (
                 <Cta>
-                  Mehr erfahren <span aria-hidden="true">→</span>
+                  Learn more <span aria-hidden="true">→</span>
                 </Cta>
               )}
             </Card>
@@ -65,7 +66,7 @@ export default function Cards({ cards, order, active, setActive }) {
             >
               {active === 2 && (
                 <Cta>
-                  Mehr erfahren <span aria-hidden="true">→</span>
+                  Learn more <span aria-hidden="true">→</span>
                 </Cta>
               )}
             </Card>

@@ -18,16 +18,16 @@ export default function Timeline({
     B: "#484B4D",
   },
 }) {
-  // Robustness: Validate items - ALL HOOKS MUST BE BEFORE ANY EARLY RETURNS
+  // validate items before any hooks
   const validItems = useMemo(
     () => (Array.isArray(items) ? items.filter(Boolean) : []),
     [items]
   );
   const itemCount = validItems.length;
 
-  /* Geometrische Ableitungen */
-  const AMP = height * 0.17; // ca. 26% der Gesamt-Hoehe
-  const TRACK_GAP = height * 0.04; // vertikaler Abstand der beiden Gleise
+  /* Geometric calculations */
+  const AMP = height * 0.17; // ~26% of total height
+  const TRACK_GAP = height * 0.04; // Vertical spacing between tracks
   const baseY_A = height / 2 - TRACK_GAP;
   const baseY_B = height / 2 + TRACK_GAP;
 
@@ -35,12 +35,12 @@ export default function Timeline({
   const truncateTitle = useCallback((title) => {
     if (!title) return "";
 
-    // Wenn der gesamte Text unter 30 Zeichen hat, bleibt er einzeilig
+    // If the entire text is under 30 characters, keep it single-line
     if (title.length <= 30) {
       return title;
     }
 
-    // Nur bei längerem Text: Wort-basierte Aufteilung auf max. 2 Zeilen
+    // For longer text: split into max 2 lines based on words
     const words = title.split(" ");
     const lines = [];
     let currentLine = "";
@@ -59,42 +59,42 @@ export default function Timeline({
         if (lines.length >= 2) break;
       }
     }
-    
-    // Füge die letzte Zeile hinzu, falls vorhanden und Platz da ist
+
+    // Add remaining line if present and within limit
     if (currentLine && lines.length < 2) {
       lines.push(currentLine);
     }
-    
-    // Verbinde mit \n nur wenn wirklich mehrere Zeilen vorhanden sind
+
+    // Join with \n only if multiple lines exist
     return lines.length > 1 ? lines.join("\n") : lines[0] || "";
   }, []);
 
-  // Helper function to calculate label width (Schätzung basierend auf Text)
+  // Helper function to estimate label width based on text content
   const calculateLabelWidth = useCallback(
     (title, year) => {
-      if (!title || !year) return 200; // Fallback
+      if (!title || !year) return 200; // Fallback width
 
-      // Präzisere Breitenberechnung
+      // More precise width calculation
       const truncatedTitle = truncateTitle(title);
       const lines = truncatedTitle.split("\n");
 
-      // Schätze Breite pro Zeile (verschiedene Zeichen haben unterschiedliche Breiten)
+      // Estimate width per line (different characters have different widths)
       const estimateLineWidth = (line) => {
-        // Durchschnittlich: Großbuchstaben ~14px, Kleinbuchstaben ~10px, Leerzeichen ~5px
+        // Average: uppercase ~14px, lowercase ~10px, spaces ~5px
         let width = 0;
         for (const char of line) {
           if (char === " ") width += 5;
           else if (char >= "A" && char <= "Z") width += 14;
           else if (char >= "a" && char <= "z") width += 10;
-          else width += 12; // Zahlen, Sonderzeichen
+          else width += 12; // Numbers, special characters
         }
         return width;
       };
 
       const maxLineWidth = Math.max(...lines.map(estimateLineWidth));
-      const yearWidth = year.toString().length * 14; // Jahr ist meist in größerer Schrift
+      const yearWidth = year.toString().length * 14; // Year text is usually in larger font
 
-      // Finale Breite: größte Zeile + Padding (32px)
+      // Final width: largest line + padding (32px)
       const estimatedWidth = Math.max(maxLineWidth, yearWidth) + 40;
 
       // Min 150px, Max 450px
@@ -103,13 +103,13 @@ export default function Timeline({
     [truncateTitle]
   );
 
-  const MIN_SPACING_PX = 150; // Mindestabstand zwischen Label-Ende und nächstem Punkt
-  const CURVE_TILT = 0.7; // Kurve kippt 20% der Punktbewegung mit
-  const SWAY_MAX = 5; // maximale Sway-Amplitude (px)
-  const FADE_START = 300; // 40 px vor VP-Rand beginnt Fade-Out
-  const FADE_END = -60; // 60 px ausserhalb ist 0 Opacity
+  const MIN_SPACING_PX = 150; // Minimum spacing between label end and next point
+  const CURVE_TILT = 0.7; // Curve tilts with 20% of point movement
+  const SWAY_MAX = 5; // Maximum sway amplitude (px)
+  const FADE_START = 300; // Fade-out starts 40px before viewport edge
+  const FADE_END = -60; // 0 opacity at 60px outside viewport
 
-  /* Viewport-Breite ermitteln */
+  /* Determine viewport width */
   const vpRef = useRef(null);
   const [vpW, setVpW] = useState(window.innerWidth);
   useEffect(() => {
@@ -124,18 +124,18 @@ export default function Timeline({
   const LEFT_MARGIN = vpW * 0.25;
   const RIGHT_MARGIN = vpW * 0.25;
 
-  /* X-Grundkoordinaten aller Punkte - basierend auf dynamischen Label-Breiten */
+  /* Base X coordinates of all points - based on dynamic label widths */
   const { baseX, totalW } = useMemo(() => {
     if (itemCount === 0) return { baseX: [], totalW: 1 };
 
-    const positions = [LEFT_MARGIN]; // Erster Punkt
+    const positions = [LEFT_MARGIN]; // First point
 
     for (let i = 1; i < itemCount; i++) {
       const prevItem = validItems[i - 1];
       const prevLabelWidth = calculateLabelWidth(prevItem.title, prevItem.year);
       const prevX = positions[i - 1];
 
-      // Nächste Position = vorherige Position + Label-Breite + Mindestabstand
+      // Next position = previous position + label width + minimum spacing
       const nextX = prevX + prevLabelWidth + MIN_SPACING_PX;
       positions.push(nextX);
     }
@@ -145,8 +145,8 @@ export default function Timeline({
       positions[positions.length - 1] + RIGHT_MARGIN
     );
 
-    // Zusätzliche Validierung: begrenze totalWidth auf ein sinnvolles Maximum
-    const maxTotalWidth = 50000; // 50.000px als sinnvolle Obergrenze
+    // Additional validation: limit totalWidth to sensible maximum
+    const maxTotalWidth = 50000; // 50,000px as reasonable upper limit
     const safeTotalWidth = Math.min(totalWidth, maxTotalWidth);
 
     return { baseX: positions, totalW: safeTotalWidth };
@@ -160,13 +160,13 @@ export default function Timeline({
   ]);
 
   const { pathA, pathB, lookupA, lookupB } = useMemo(() => {
-    // Debug: Prüfe totalW Werte
+    // Debug: Check totalW values
     console.log("Building paths with totalW:", totalW, "type:", typeof totalW);
 
-    // Verwende totalW aus dem baseX useMemo
-    let validTotalW = Math.max(1, totalW || 1); // Fallback falls totalW undefined
+    // Use totalW from the baseX useMemo
+    let validTotalW = Math.max(1, totalW || 1); // Fallback if totalW is undefined
 
-    // Zusätzliche Validierung
+    // Additional validation
     if (!Number.isFinite(validTotalW) || validTotalW < 0) {
       console.error("Invalid totalW:", validTotalW, "using fallback 1000");
       validTotalW = 1000;
@@ -198,20 +198,20 @@ export default function Timeline({
     return { pathA: a.d, pathB: b.d, lookupA: a.lu, lookupB: b.lu };
   }, [totalW, AMP, baseY_A, baseY_B]);
 
-  /* Animations-State */
-  const [offsetX, setOffsetX] = useState(totalW); // Intro: ganz rechts
+  /* Animation state */
+  const [offsetX, setOffsetX] = useState(totalW); // Intro: start from far right
   const [isSnapping, setIsSnapping] = useState(true);
   const [swayPhase, setSwayPhase] = useState(0);
-  const [snapProg, setSnapProg] = useState(0); // 0 bis 1
+  const [snapProg, setSnapProg] = useState(0); // 0 to 1
   const rafSnap = useRef(null);
   const rafSway = useRef(null);
   const easeOut = (t) => 1 - (1 - t) ** 3;
 
-  /* Snap-/Intro-Animation */
+  /* Snap/Intro animation */
   useEffect(() => {
     const start = performance.now();
     const from = offsetX;
-    const targetX = LEFT_MARGIN - baseX[activeIndex]; // Punkt zur Anker-Mitte
+    const targetX = LEFT_MARGIN - baseX[activeIndex]; // Point to anchor center
 
     setIsSnapping(true);
 
@@ -234,11 +234,11 @@ export default function Timeline({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex, baseX, LEFT_MARGIN]);
 
-  /* Sway (nur waehrend Snap) */
+  /* Sway (only during snap) */
   useEffect(() => {
     if (!isSnapping) return;
     const loop = () => {
-      setSwayPhase((p) => p + 0.018); // ca. 1,75 s pro Sinus
+      setSwayPhase((p) => p + 0.018); // ~1.75s per sine cycle
       rafSway.current = requestAnimationFrame(loop);
     };
     rafSway.current = requestAnimationFrame(loop);
@@ -264,27 +264,27 @@ export default function Timeline({
     return (
       <div className={styles.timeline} style={{ height }}>
         <div className={styles.timelineFallback}>
-          Keine Timeline-Daten verfügbar.
+          No timeline data available.
         </div>
       </div>
     );
   }
 
-  /* Anchor-Bereich (Pixel) */
+  /* Anchor area (pixels) */
   const ANCHOR_START = vpW * 0.2;
   const ANCHOR_END = vpW * 0.3;
   const ANCHOR_MID = vpW * 0.25;
   const MID_TOL = 2;
 
-  /* Wrapper-Transforms */
+  /* Wrapper transforms */
   const dragPx = dragOffset * vpW;
   const pointsT = `translateX(${offsetX + dragPx + swayX}px)`;
   const curveT = `translateX(${offsetX * CURVE_TILT + dragPx + swayX}px)`;
 
-  /* JSX-Render */
+  /* JSX render */
   return (
     <div className={styles.timeline} ref={vpRef} style={{ height }}>
-      {/* SVG-Kurven */}
+      {/* SVG curves */}
       <svg
         className={styles.timelineSvg}
         style={{ width: totalW }}
@@ -305,13 +305,13 @@ export default function Timeline({
         </g>
       </svg>
 
-      {/* Punkte + Labels */}
+      {/* Points + Labels */}
       <div
         className={styles.pointsWrapper}
         style={{ width: totalW, transform: pointsT }}
       >
         {validItems.map((it, i) => {
-          /* Track-Wahl: item.track explizit > typbasiertes Fallback */
+          /* Track selection: explicit item.track > type-based fallback */
           const track = it.track ?? (it.type === "history" ? "A" : "B");
 
           const x = baseX[i];
@@ -322,7 +322,7 @@ export default function Timeline({
           const atMid = Math.abs(screenX - ANCHOR_MID) <= MID_TOL;
           const active = i === activeIndex && atMid;
 
-          /* Fade-Out links */
+          /* Fade-out on the left */
           let opacity = 1;
           if (screenX < FADE_START) {
             opacity =
@@ -331,7 +331,7 @@ export default function Timeline({
                 : (screenX - FADE_END) / (FADE_START - FADE_END);
           }
 
-          /* Klassen zusammensetzen */
+          /* Compose CSS classes */
           const pCls = [
             styles.timelinePoint,
             track === "A" ? styles.trackHistory : styles.trackCase,
@@ -349,7 +349,7 @@ export default function Timeline({
             .filter(Boolean)
             .join(" ");
 
-          /* Gemeinsamer Click-Handler für Punkt + Label */
+          /* Shared click handler for point + label */
           const handleClick = () => {
             if (i !== activeIndex) onSelect(i);
           };
@@ -363,16 +363,16 @@ export default function Timeline({
               key={i}
               style={{ position: "absolute", left: `${x}px`, top: 0, opacity }}
             >
-              {/* Punkt */}
+              {/* Point */}
               <div
                 role="button"
                 tabIndex={0}
-                aria-label={`Meilenstein ${it.year}`}
+                aria-label={`Milestone ${it.year}`}
                 onClick={handleClick}
                 className={pCls}
                 style={{ top: `${y}px` }}
               />
-              {/* Label - jetzt ebenfalls interaktiv */}
+              {/* Label - now also interactive */}
               <div
                 role="button"
                 tabIndex={0}
@@ -382,9 +382,9 @@ export default function Timeline({
                   top: `${y}px`,
                   left: "16px",
                   transform: "translateY(-50%)",
-                  whiteSpace: "pre-line", // \n im Title zulassen
+                  whiteSpace: "pre-line", // Allow \n in title
                   cursor: "pointer",
-                  width: `${labelWidth}px`, // Dynamische Breite
+                  width: `${labelWidth}px`, // Dynamic width
                 }}
               >
                 <div className={styles.labelTitle}>{truncatedTitle}</div>
@@ -395,9 +395,9 @@ export default function Timeline({
         })}
       </div>
 
-      {/* Reset Button außerhalb des scrollbaren Bereichs */}
+      {/* Reset Button outside the scrollable area */}
       {(() => {
-        // Prüfe ob der letzte Punkt im Anchor-Bereich ist
+        // Check if the last point is in the anchor area
         const lastIndex = validItems.length - 1;
         if (lastIndex < 0) return null;
 
@@ -413,7 +413,7 @@ export default function Timeline({
             className={styles.resetButtonContainer}
             style={{
               position: "absolute",
-              right: "70px", // Rechts vom Timeline-Container
+              right: "70px", // Right of timeline container
               top: `${height / 2}px`,
               transform: "translateY(-50%)",
               opacity: 1,
@@ -421,7 +421,7 @@ export default function Timeline({
             }}
           >
             <div className={styles.resetLabel} onClick={() => onSelect(0)}>
-              Zum Anfang
+              Zurück zum Anfang
             </div>
             <div
               role="button"

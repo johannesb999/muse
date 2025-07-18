@@ -6,15 +6,15 @@ import styles from "./scss/History.module.scss";
 
 const imageVariants = {
   center: {
-    left: "30%", // Bild A zentriert, Text wird rechts davon positioniert
+    left: "30%",
     x: "-45%",
-    scale: 1, // Startet klein
+    scale: 1,
     opacity: 1,
     zIndex: 4,
     filter: "blur(0px) brightness(1)",
     transition: {
-      scale: { duration: 0.6, delay: 1.3 }, // Vergrößern nach Verschieben
-      left: { duration: 0.5, delay: 0.8 }, // Verschieben nach Pause
+      scale: { duration: 0.6, delay: 1.3 },
+      left: { duration: 0.5, delay: 0.8 },
       x: { duration: 0.5, delay: 0.8 },
       opacity: { duration: 0.3 },
       filter: { duration: 0.3 },
@@ -22,14 +22,14 @@ const imageVariants = {
   },
   leftEdge: {
     left: "0%",
-    x: "-55%", // Teilweise abgeschnitten
+    x: "-55%",
     scale: 0.5,
     opacity: 1,
     zIndex: 3,
     filter: "blur(0px) brightness(0.5)",
     transition: {
-      scale: { duration: 0.6 }, // Verkleinern zuerst
-      left: { duration: 0.5, delay: 0.8 }, // Verschieben nach Pause
+      scale: { duration: 0.6 },
+      left: { duration: 0.5, delay: 0.8 },
       x: { duration: 0.5, delay: 0.8 },
       opacity: { duration: 0.3 },
       filter: { duration: 0.3 },
@@ -37,14 +37,14 @@ const imageVariants = {
   },
   rightEdge: {
     left: "100%",
-    x: "-45%", // Teilweise abgeschnitten
+    x: "-45%",
     scale: 0.5,
     opacity: 1,
     zIndex: 3,
     filter: "blur(0px) brightness(0.5)",
     transition: {
-      scale: { duration: 0.6 }, // Verkleinern zuerst
-      left: { duration: 0.5, delay: 0.8 }, // Verschieben nach Pause
+      scale: { duration: 0.6 },
+      left: { duration: 0.5, delay: 0.8 },
       x: { duration: 0.5, delay: 0.8 },
       opacity: { duration: 0.3 },
       filter: { duration: 0.3 },
@@ -57,8 +57,8 @@ const imageVariants = {
     opacity: 0,
     zIndex: 1,
     transition: {
-      scale: { duration: 0.3 }, // Verkleinern zuerst
-      left: { duration: 0.5, delay: 0.8 }, // Verschieben nach Pause
+      scale: { duration: 0.3 },
+      left: { duration: 0.5, delay: 0.8 },
       x: { duration: 0.5, delay: 0.8 },
       opacity: { duration: 0.3 },
       filter: { duration: 0.3 },
@@ -71,14 +71,14 @@ const imageVariants = {
     scale: 0.5,
     zIndex: 1,
     transition: {
-      scale: { duration: 0.3 }, // Verkleinern zuerst
-      left: { duration: 0.5, delay: 0.8 }, // Verschieben nach Pause
+      scale: { duration: 0.3 },
+      left: { duration: 0.5, delay: 0.8 },
       x: { duration: 0.5, delay: 0.8 },
       opacity: { duration: 0.3 },
       filter: { duration: 0.3 },
     },
   },
-  // Zustand für Verkleinerung vor Verschieben
+  // Initial shrink state before repositioning
   shrink: {
     scale: 0.5,
     transition: { duration: 0.3 },
@@ -117,7 +117,7 @@ export default function History() {
               variant = "hiddenRight";
             }
 
-            // Verkleinerung vor Verschieben nur für das aktuelle zentrale Bild
+            // Only shrink the current center image before repositioning
             const initialVariant = diff === 0 ? "shrink" : "hiddenRight";
 
             const imgClass =

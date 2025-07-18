@@ -1,8 +1,10 @@
+
+//use \
 export const timelineItems = [
     {
         year: "1972",
         title: "Gründung des Unternehmens in Neu-Ulm",
-        text: `Die Wirtschaftskanzlei SGP Schneider Geiwitz wurde 1972 in Neu-Ulm gegründet und bot von Beginn an Wirtschaftsprüfung, Steuer- und Rechtsberatung, Corporate Finance, Nachlassverwaltung, Restrukturierung und Insolvenzverwaltung an.`,
+        text: `Die Wirtschaftskanzlei SGP Schneider Geiwitz bot von Beginn an Wirtschaftsprüfung, Steuer- und Rechtsberatung, Corporate Finance, Nachlassverwaltung, Restrukturierung und Insolvenzverwaltung an.`,
         img: "./assets/historie-1972.png",
         type: "history",
         track: "B",
@@ -17,7 +19,7 @@ export const timelineItems = [
     },
     {
         year: "1995",
-        title: "Öffentlichkeitswirksame \nMandate",
+        title: "Öffentlichkeitswirksame Mandate",
         text: `Durch die Übernahme von prominenten Mandaten wuchs die Bekanntheit der Kanzlei stetig und etablierte SGP als führende Adresse für komplexe wirtschaftliche Herausforderungen.`,
         img: "./assets/historie-1995.png",
         type: "case",

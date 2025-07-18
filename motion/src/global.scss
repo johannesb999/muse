@@ -1,20 +1,60 @@
 @use "./pages/scss/fonts.scss" as *;
 
 :root {
-  //colors
+  /* Colors */
   --bg: #000;
+  --text-white: #fff;
+  --text-black: #000;
   --card-bg: #111;
   --card-bg-dark: hsla(70, 100%, 64%, 0.081);
   --accent: #e0ff46;
   --text-light: #eee;
   --text-muted: #ccd;
 
-  //dimensions
+  /* Typography */
+  --font-primary: "BeausiteClassic", sans-serif;
+  --font-secondary: "BeausiteFit", sans-serif;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.3;
+  --line-height-relaxed: 1.6;
 
-  --radius: 24px;
+  /* Font sizes */
+  --font-size-xs: 0.8rem;
+  --font-size-sm: 1.2rem;
+  --font-size-md: 1.25rem;
+  --font-size-lg: 1.5rem;
+  --font-size-xl: 1.75rem;
+  --font-size-2xl: 2rem;
+  --font-size-3xl: 3rem;
+  --font-size-4xl: 11.25rem;
+
+  /* Spacing */
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 48px;
   --gap: 3rem;
 
-  //text-styles
+  /* Border and outline */
+  --border-width: 2px;
+  --outline-offset: 3px;
+  --shadow-ring: 6px;
+
+  /* Border radius */
+  --radius: 24px;
+  --radius-sm: 14px;
+  --radius-full: 50%;
+
+  /* Transitions */
+  --transition-fast: 300ms ease;
+  --transition-normal: 600ms ease;
+  --easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Z-index */
+  --z-timeline: 1000;
+  --z-reset-button: 1001;
+  --z-text-overlay: 10;
 }
 
 * {
@@ -28,13 +68,13 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: "BeausiteClassic", sans-serif;
+  font-family: var(--font-primary);
 }
 
 .page {
   background: var(--bg);
   color: var(--text-light);
-  font-family: "BeausiteClassic", sans-serif;
+  font-family: var(--font-primary);
   font-weight: 400;
   min-height: 100vh;
   max-width: 100dvw;
