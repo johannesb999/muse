@@ -10,7 +10,7 @@ const Wave = ({
   phase,
   color,
   numParticles = 1500,
-  particleSpeed = 0.5,
+  particleSpeed = 0.2,
   noiseAmount = 3,
 }) => {
   const canvasRef = useRef(null);
@@ -114,7 +114,7 @@ export default function AnimatedWaves({
         phase={0.5} // Leichter Phasenversatz für mehr Variation
         color={secondaryColorA}
         numParticles={500} // Weniger Partikel für die Nebenwelle
-        particleSpeed={0.4}
+        particleSpeed={0.2}
       />
 
       {/* --- Wellen für Track B --- */}
@@ -137,7 +137,7 @@ export default function AnimatedWaves({
         phase={Math.PI + 0.5} // Leichter Phasenversatz für mehr Variation
         color={secondaryColorB}
         numParticles={500} // Weniger Partikel für die Nebenwelle
-        particleSpeed={0.4}
+        particleSpeed={0.2}
       />
     </div>
   );
