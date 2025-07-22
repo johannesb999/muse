@@ -10,6 +10,24 @@
   font-family: var(--font-primary);
 }
 
+/* Neuer Container für die Canvas-Wellen */
+.wavesContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  /* Stellt sicher, dass die Animation nicht klickbar ist */
+
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}
+
+
 .timelineSvg {
   position: absolute;
   top: 0;
@@ -20,13 +38,15 @@
 .pointsWrapper {
   position: relative;
   height: 100%;
+  z-index: 1;
+  /* Stellt sicher, dass die Punkte über den Wellen liegen */
 
   >div {
     transition: opacity var(--transition-fast);
   }
 }
 
-/* Timeline curves */
+/* Timeline curves (wird nicht mehr für die Linien selbst verwendet) */
 .timelineCurve {
   fill: none;
   stroke-width: 2;
