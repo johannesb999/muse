@@ -288,6 +288,18 @@ export default function Timeline({
   /* JSX render */
   return (
     <div className={styles.timeline} ref={vpRef} style={{ height }}>
+      {/* Video background */}
+      <video
+        className={styles.timelineVideo}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+      >
+        <source src="/public/assets/Waves.mp4" type="video/mp4" />
+      </video>
+      
       {/* SVG curves */}
       <svg
         className={styles.timelineSvg}

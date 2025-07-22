@@ -10,6 +10,18 @@
   font-family: var(--font-primary);
 }
 
+.timelineVideo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  opacity: 0.6;
+  filter: brightness(1.3) contrast(1.1);
+}
+
 .timelineSvg {
   position: absolute;
   top: 0;
