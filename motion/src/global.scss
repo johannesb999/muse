@@ -61,25 +61,21 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+
 }
 
-html,
-body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  font-family: var(--font-primary);
-}
+
 
 .page {
   background: var(--bg);
   color: var(--text-light);
   font-family: var(--font-primary);
   font-weight: 400;
-  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-y: hidden;
   max-width: 100dvw;
 }
 
-.header .logo {
-  height: 2rem;
-}
+// .header .logo {
+//   height: 2rem;
+// }
