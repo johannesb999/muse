@@ -13,11 +13,11 @@ const imageVariants = {
     zIndex: 4,
     filter: "blur(0px) brightness(1)",
     transition: {
-      scale: { duration: 0.6, delay: 1.3 },
-      left: { duration: 0.5, delay: 0.8 },
-      x: { duration: 0.5, delay: 0.8 },
-      opacity: { duration: 0.3 },
-      filter: { duration: 0.3 },
+      scale: { duration: 0.8, delay: 1.3, ease: [0.7, 1, 0.3, 1] },
+      left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      opacity: { duration: 0.4, ease: "easeOut" },
+      filter: { duration: 0.4, ease: "easeOut" },
     },
   },
   leftEdge: {
@@ -28,11 +28,11 @@ const imageVariants = {
     zIndex: 3,
     filter: "blur(0px) brightness(0.5)",
     transition: {
-      scale: { duration: 0.6 },
-      left: { duration: 0.5, delay: 0.8 },
-      x: { duration: 0.5, delay: 0.8 },
-      opacity: { duration: 0.3 },
-      filter: { duration: 0.3 },
+      scale: { duration: 0.8, ease: [0.7, 1, 0.3, 1] },
+      left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      opacity: { duration: 0.4, ease: "easeOut" },
+      filter: { duration: 0.4, ease: "easeOut" },
     },
   },
   rightEdge: {
@@ -43,11 +43,11 @@ const imageVariants = {
     zIndex: 3,
     filter: "blur(0px) brightness(0.5)",
     transition: {
-      scale: { duration: 0.6 },
-      left: { duration: 0.5, delay: 0.8 },
-      x: { duration: 0.5, delay: 0.8 },
-      opacity: { duration: 0.3 },
-      filter: { duration: 0.3 },
+      scale: { duration: 0.8, ease: [0.7, 1, 0.3, 1] },
+      left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      opacity: { duration: 0.4, ease: "easeOut" },
+      filter: { duration: 0.4, ease: "easeOut" },
     },
   },
   exitLeft: {
@@ -57,11 +57,11 @@ const imageVariants = {
     opacity: 0,
     zIndex: 1,
     transition: {
-      scale: { duration: 0.3 },
-      left: { duration: 0.5, delay: 0.8 },
-      x: { duration: 0.5, delay: 0.8 },
-      opacity: { duration: 0.3 },
-      filter: { duration: 0.3 },
+      scale: { duration: 0.5, ease: [0.7, 1, 0.3, 1] },
+      left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      opacity: { duration: 0.4, ease: "easeOut" },
+      filter: { duration: 0.4, ease: "easeOut" },
     },
   },
   hiddenRight: {
@@ -71,17 +71,17 @@ const imageVariants = {
     scale: 0.5,
     zIndex: 1,
     transition: {
-      scale: { duration: 0.3 },
-      left: { duration: 0.5, delay: 0.8 },
-      x: { duration: 0.5, delay: 0.8 },
-      opacity: { duration: 0.3 },
-      filter: { duration: 0.3 },
+      scale: { duration: 0.5, ease: [0.7, 1, 0.3, 1] },
+      left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      opacity: { duration: 0.4, ease: "easeOut" },
+      filter: { duration: 0.4, ease: "easeOut" },
     },
   },
   // Initial shrink state before repositioning
   shrink: {
     scale: 0.5,
-    transition: { duration: 0.3 },
+    transition: { duration: 0.4, ease: [0.7, 1, 0.3, 1] },
   },
 };
 
