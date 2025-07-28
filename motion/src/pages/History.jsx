@@ -13,7 +13,7 @@ const imageVariants = {
     zIndex: 4,
     filter: "blur(0px) brightness(1)",
     transition: {
-      scale: { duration: 0.8, delay: 1.3, ease: [0.7, 1, 0.3, 1] },
+      scale: { duration: 0.6, delay: 1.3, ease: [0.7, 1, 0.3, 1] }, // Scale-up: 0.4s
       left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
       x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
       opacity: { duration: 0.4, ease: "easeOut" },
@@ -28,7 +28,7 @@ const imageVariants = {
     zIndex: 3,
     filter: "blur(0px) brightness(0.5)",
     transition: {
-      scale: { duration: 0.8, ease: [0.7, 1, 0.3, 1] },
+      scale: { duration: 0.28, ease: [0.7, 1, 0.3, 1] }, // Scale-down: 0.28s (30% schneller)
       left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
       x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
       opacity: { duration: 0.4, ease: "easeOut" },
@@ -43,7 +43,7 @@ const imageVariants = {
     zIndex: 3,
     filter: "blur(0px) brightness(0.5)",
     transition: {
-      scale: { duration: 0.8, ease: [0.7, 1, 0.3, 1] },
+      scale: { duration: 0.28, ease: [0.7, 1, 0.3, 1] }, // Scale-down: 0.28s (30% schneller)
       left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
       x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
       opacity: { duration: 0.4, ease: "easeOut" },
@@ -57,7 +57,7 @@ const imageVariants = {
     opacity: 0,
     zIndex: 1,
     transition: {
-      scale: { duration: 0.5, ease: [0.7, 1, 0.3, 1] },
+      scale: { duration: 0.28, ease: [0.7, 1, 0.3, 1] }, // Scale-down: 0.28s (30% schneller)
       left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
       x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
       opacity: { duration: 0.4, ease: "easeOut" },
@@ -71,7 +71,7 @@ const imageVariants = {
     scale: 0.5,
     zIndex: 1,
     transition: {
-      scale: { duration: 0.5, ease: [0.7, 1, 0.3, 1] },
+      scale: { duration: 0.28, ease: [0.7, 1, 0.3, 1] }, // Scale-down: 0.28s (30% schneller)
       left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
       x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
       opacity: { duration: 0.4, ease: "easeOut" },
@@ -81,7 +81,7 @@ const imageVariants = {
   // Initial shrink state before repositioning
   shrink: {
     scale: 0.5,
-    transition: { duration: 0.4, ease: [0.7, 1, 0.3, 1] },
+    transition: { duration: 0.28, ease: [0.7, 1, 0.3, 1] }, // Scale-down: 0.28s (30% schneller)
   },
 };
 
