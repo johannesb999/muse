@@ -14,8 +14,8 @@ const imageVariants = {
     filter: "blur(0px) brightness(1)",
     transition: {
       scale: { duration: 0.6, delay: 1.3, ease: [0.7, 1, 0.3, 1] }, // Scale-up: 0.4s
-      left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
-      x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      left: { duration: 0.7, delay: 0, ease: [0.7, 1, 0.3, 1] }, // Delay entfernt
+      x: { duration: 0.7, delay: 0, ease: [0.7, 1, 0.3, 1] }, // Delay entfernt
       opacity: { duration: 0.4, ease: "easeOut" },
       filter: { duration: 0.4, ease: "easeOut" },
     },
@@ -29,8 +29,8 @@ const imageVariants = {
     filter: "blur(0px) brightness(0.5)",
     transition: {
       scale: { duration: 0.28, ease: [0.7, 1, 0.3, 1] }, // Scale-down: 0.28s (30% schneller)
-      left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
-      x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      left: { duration: 0.7, delay: 0, ease: [0.7, 1, 0.3, 1] }, // Delay entfernt
+      x: { duration: 0.7, delay: 0, ease: [0.7, 1, 0.3, 1] }, // Delay entfernt
       opacity: { duration: 0.4, ease: "easeOut" },
       filter: { duration: 0.4, ease: "easeOut" },
     },
@@ -44,8 +44,8 @@ const imageVariants = {
     filter: "blur(0px) brightness(0.5)",
     transition: {
       scale: { duration: 0.28, ease: [0.7, 1, 0.3, 1] }, // Scale-down: 0.28s (30% schneller)
-      left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
-      x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      left: { duration: 0.7, delay: 0, ease: [0.7, 1, 0.3, 1] }, // Delay entfernt
+      x: { duration: 0.7, delay: 0, ease: [0.7, 1, 0.3, 1] }, // Delay entfernt
       opacity: { duration: 0.4, ease: "easeOut" },
       filter: { duration: 0.4, ease: "easeOut" },
     },
@@ -58,8 +58,8 @@ const imageVariants = {
     zIndex: 1,
     transition: {
       scale: { duration: 0.28, ease: [0.7, 1, 0.3, 1] }, // Scale-down: 0.28s (30% schneller)
-      left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
-      x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      left: { duration: 0.7, delay: 0, ease: [0.7, 1, 0.3, 1] }, // Delay entfernt
+      x: { duration: 0.7, delay: 0, ease: [0.7, 1, 0.3, 1] }, // Delay entfernt
       opacity: { duration: 0.4, ease: "easeOut" },
       filter: { duration: 0.4, ease: "easeOut" },
     },
@@ -72,8 +72,8 @@ const imageVariants = {
     zIndex: 1,
     transition: {
       scale: { duration: 0.28, ease: [0.7, 1, 0.3, 1] }, // Scale-down: 0.28s (30% schneller)
-      left: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
-      x: { duration: 0.7, delay: 0.8, ease: [0.7, 1, 0.3, 1] },
+      left: { duration: 0.7, delay: 0, ease: [0.7, 1, 0.3, 1] }, // Delay entfernt
+      x: { duration: 0.7, delay: 0, ease: [0.7, 1, 0.3, 1] }, // Delay entfernt
       opacity: { duration: 0.4, ease: "easeOut" },
       filter: { duration: 0.4, ease: "easeOut" },
     },
